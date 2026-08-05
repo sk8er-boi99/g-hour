@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLICKER GAMES</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rubik+Glitch&display=swap');
+
+  :root{
+    --neon-blue:#00e5ff;
+    --neon-gold:#ffd500;
+    --neon-red:#ff1744;
+    --neon-pink:#ff2bd6;
+    --bg:#050507;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,229,255,0.06), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(255,43,214,0.06), transparent 40%),
+      var(--bg);
+    font-family:'Orbitron', sans-serif;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 20px 80px;
+    overflow-x:hidden;
+  }
+
+  /* subtle scanline / grid texture for tech vibe */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:40px 40px;
+    z-index:0;
+  }
+
+  h1{
+    position:relative;
+    z-index:1;
+    font-size:clamp(2.5rem, 8vw, 5.5rem);
+    letter-spacing:6px;
+    text-align:center;
+    margin:20px 0 60px;
+    color:#fff;
+    text-transform:uppercase;
+  }
+
+  .flicker-c{
+    display:inline-block;
+    color:var(--neon-pink);
+    animation: flicker 3.2s infinite;
+    text-shadow:
+      0 0 3px var(--neon-pink),
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 15px var(--neon-pink);
+  }
+
+  .rest{
+    color:var(--neon-pink);
+    text-shadow:
+      0 0 3px var(--neon-pink),
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 15px var(--neon-pink);
+  }
+
+  @keyframes flicker{
+    0%, 3%, 6%, 7%  { opacity:1; }
+    4% { opacity:0; }
+    5% { opacity:0; }
+    8% { opacity:0; }
+    8.5% { opacity:0; }
+    52% { opacity:1; }
+    53% { opacity:0; }
+    54% { opacity:1; }
+    70% { opacity:1; }
+    70.5% { opacity:0.1; }
+    71% { opacity:1; }
+    91% { opacity:1; }
+    92% { opacity:0; }
+  }
+
+  .grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:28px;
+    width:100%;
+    max-width:1100px;
+  }
+
+  .row-mid{
+    grid-template-columns:repeat(3, 1fr);
+  }
+
+  .cell{
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-blue);
+    border-radius:14px;
+    min-height:140px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:1.1rem;
+    letter-spacing:2px;
+    color:#7fdfff;
+    text-transform:uppercase;
+    animation: throb-blue 2.6s ease-in-out infinite;
+    padding:15px;
+    position:relative;
+  }
+
+  @keyframes throb-blue{
+    0%, 100% {
+      box-shadow: 0 0 6px rgba(0,229,255,0.25), 0 0 14px rgba(0,229,255,0.12) inset;
+      border-color: rgba(0,229,255,0.5);
+    }
+    50% {
+      box-shadow: 0 0 18px rgba(0,229,255,0.55), 0 0 30px rgba(0,229,255,0.25) inset;
+      border-color: rgba(0,229,255,0.9);
+    }
+  }
+
+  /* MAIN GAME cell */
+  .main-game{
+    grid-column: 2;
+    min-height:260px;
+    background:linear-gradient(160deg, #100d02, #0a0800);
+    border:3px solid var(--neon-gold);
+    font-size:2rem;
+    font-weight:900;
+    color:#ffe98a;
+    letter-spacing:3px;
+    animation: throb-gold 2.2s ease-in-out infinite;
+  }
+
+  @keyframes throb-gold{
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(255,213,0,0.35), 0 0 30px rgba(255,213,0,0.15) inset;
+      border-color: rgba(255,213,0,0.6);
+      text-shadow: 0 0 8px var(--neon-gold), 0 0 20px var(--neon-gold);
+    }
+    50% {
+      box-shadow: 0 0 45px rgba(255,213,0,0.85), 0 0 70px rgba(255,213,0,0.4) inset;
+      border-color: var(--neon-gold);
+      text-shadow: 0 0 15px var(--neon-gold), 0 0 40px var(--neon-gold), 0 0 70px var(--neon-gold);
+    }
+  }
+
+  /* Coming soon cell to the right of main game */
+  .coming-soon-cell{
+    flex-direction:column;
+    gap:6px;
+    border-color:var(--neon-gold);
+    color:#fff;
+  }
+
+  .thumb{
+    font-size:2.2rem;
+    transform: rotate(0deg);
+    animation: point 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px var(--neon-gold));
+  }
+
+  @keyframes point{
+    0%, 100% { transform: translateX(0) rotate(-8deg); }
+    50% { transform: translateX(-6px) rotate(-8deg); }
+  }
+
+  .coming-soon-big{
+    font-size:1.6rem;
+    font-weight:900;
+    color:var(--neon-gold);
+    text-shadow:0 0 8px var(--neon-gold), 0 0 20px var(--neon-gold);
+    letter-spacing:2px;
+  }
+
+  .coming-soon-small{
+    font-size:0.75rem;
+    color:#ccc;
+    letter-spacing:1px;
+    text-transform:none;
+    font-family: sans-serif;
+    opacity:0.85;
+  }
+
+  /* Made by cell */
+  .made-by{
+    border-color:var(--neon-red);
+    color:var(--neon-red);
+    font-size:1.4rem;
+    font-weight:900;
+    text-shadow:0 0 8px var(--neon-red), 0 0 20px var(--neon-red), 0 0 35px var(--neon-red);
+    animation: throb-red 2.6s ease-in-out infinite;
+    line-height:1.5;
+  }
+
+  @keyframes throb-red{
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(255,23,68,0.3), 0 0 20px rgba(255,23,68,0.15) inset;
+      border-color: rgba(255,23,68,0.6);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(255,23,68,0.7), 0 0 45px rgba(255,23,68,0.3) inset;
+      border-color: var(--neon-red);
+    }
+  }
+
+  .cell-link{
+    text-decoration:none;
+    cursor:pointer;
+    transition: transform 0.15s ease;
+    font-family:'Orbitron', sans-serif;
+    outline:none;
+  }
+
+  .cell-link:hover{
+    transform: scale(1.03);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 25px rgba(0,229,255,0.7), 0 0 40px rgba(0,229,255,0.35) inset;
+  }
+
+  /* ---------- Game view (Car Clicker) ---------- */
+  .game-view{
+    position:relative;
+    z-index:1;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    max-width:920px;
+  }
+
+  .back-link{
+    align-self:flex-start;
+    background:transparent;
+    color:var(--neon-blue);
+    text-decoration:none;
+    font-family:'Orbitron', sans-serif;
+    font-size:0.9rem;
+    letter-spacing:1px;
+    margin-bottom:25px;
+    border:1px solid var(--neon-blue);
+    padding:8px 14px;
+    border-radius:8px;
+    text-shadow:0 0 6px var(--neon-blue);
+    box-shadow:0 0 10px rgba(0,229,255,0.3);
+    cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  .back-link:hover{
+    box-shadow:0 0 20px rgba(0,229,255,0.7);
+    transform: translateX(-3px);
+  }
+
+  .game-title{
+    font-size:clamp(1.8rem, 6vw, 3rem);
+    letter-spacing:4px;
+    margin:0 0 30px;
+    color:var(--neon-gold);
+    text-transform:uppercase;
+    text-shadow:0 0 8px var(--neon-gold), 0 0 20px var(--neon-gold), 0 0 40px var(--neon-gold);
+  }
+
+  .game-wrap{
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:30px;
+    width:100%;
+  }
+
+  .main-col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:30px;
+    width:100%;
+    max-width:440px;
+    flex:1 1 380px;
+  }
+
+  .stat-panel{
+    width:100%;
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-blue);
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 0 15px rgba(0,229,255,0.3), 0 0 25px rgba(0,229,255,0.12) inset;
+  }
+
+  .stat-panel .label{
+    font-size:0.8rem;
+    letter-spacing:2px;
+    color:#7fdfff;
+    opacity:0.8;
+  }
+
+  .stat-panel .value{
+    font-size:2.4rem;
+    font-weight:900;
+    color:var(--neon-blue);
+    text-shadow:0 0 8px var(--neon-blue), 0 0 20px var(--neon-blue);
+    margin-top:5px;
+  }
+
+  .car-button{
+    background:radial-gradient(circle at 50% 40%, #1a1a1f, #0a0a0d);
+    border:3px solid var(--neon-pink);
+    border-radius:20px;
+    width:260px;
+    height:260px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:6rem;
+    cursor:pointer;
+    user-select:none;
+    box-shadow:0 0 20px rgba(255,43,214,0.4), 0 0 40px rgba(255,43,214,0.15) inset;
+    transition: transform 0.08s ease;
+  }
+
+  .car-button:active{
+    transform: scale(0.92);
+  }
+
+  .car-button.bump{
+    animation: bump 0.15s ease;
+  }
+
+  @keyframes bump{
+    0% { box-shadow:0 0 20px rgba(255,43,214,0.4), 0 0 40px rgba(255,43,214,0.15) inset; }
+    50% { box-shadow:0 0 45px rgba(255,43,214,0.9), 0 0 70px rgba(255,43,214,0.4) inset; }
+    100% { box-shadow:0 0 20px rgba(255,43,214,0.4), 0 0 40px rgba(255,43,214,0.15) inset; }
+  }
+
+  .shop{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .upgrade{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-green, #39ff14);
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:0 0 8px rgba(57,255,20,0.2);
+  }
+
+  .upgrade .info{
+    text-align:left;
+  }
+
+  .upgrade .info .name{
+    font-size:0.9rem;
+    color:#39ff14;
+    text-shadow:0 0 6px #39ff14;
+    letter-spacing:1px;
+  }
+
+  .upgrade .info .desc{
+    font-size:0.65rem;
+    color:#aaa;
+    font-family: sans-serif;
+    margin-top:3px;
+  }
+
+  .upgrade button{
+    background:#0a0a0d;
+    border:2px solid #39ff14;
+    color:#39ff14;
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    letter-spacing:1px;
+    font-size:0.75rem;
+    text-shadow:0 0 5px #39ff14;
+    transition: all 0.15s ease;
+    white-space:nowrap;
+  }
+
+  .upgrade button:hover:not(:disabled){
+    box-shadow:0 0 15px rgba(57,255,20,0.6);
+    transform: scale(1.05);
+  }
+
+  .upgrade button:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+
+  /* ---------- Prestige bar ---------- */
+  .prestige-panel{
+    width:100%;
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-gold);
+    border-radius:14px;
+    padding:16px 20px;
+    box-shadow:0 0 15px rgba(255,213,0,0.3), 0 0 25px rgba(255,213,0,0.12) inset;
+  }
+
+  .prestige-panel .label{
+    font-size:0.8rem;
+    letter-spacing:2px;
+    color:var(--neon-gold);
+    opacity:0.9;
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .prestige-bar-outer{
+    width:100%;
+    height:16px;
+    background:#111;
+    border:1px solid rgba(255,213,0,0.4);
+    border-radius:10px;
+    margin-top:10px;
+    overflow:hidden;
+  }
+
+  .prestige-bar-inner{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, #ffd500, #fff3ad);
+    box-shadow:0 0 12px rgba(255,213,0,0.8);
+    transition: width 0.3s ease;
+  }
+
+  /* ---------- Garage (car collection) ---------- */
+  .garage-col{
+    width:100%;
+    max-width:440px;
+    flex:1 1 380px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .garage-title{
+    text-align:center;
+    font-size:1.1rem;
+    letter-spacing:2px;
+    color:var(--neon-pink);
+    text-shadow:0 0 6px var(--neon-pink), 0 0 16px var(--neon-pink);
+    margin-bottom:4px;
+  }
+
+  .car-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-pink);
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:8px;
+    box-shadow:0 0 10px rgba(255,43,214,0.25);
+  }
+
+  .car-item.owned{
+    border-color:var(--neon-gold);
+    box-shadow:0 0 15px rgba(255,213,0,0.4);
+  }
+
+  .car-item.ferrari{
+    border-color:var(--neon-red);
+    box-shadow:0 0 15px rgba(255,23,68,0.35);
+  }
+
+  .car-item.ferrari.owned{
+    border-color:var(--neon-gold);
+    box-shadow:0 0 20px rgba(255,213,0,0.55);
+  }
+
+  .car-item .info{
+    text-align:left;
+  }
+
+  .car-item .info .name{
+    font-size:0.95rem;
+    letter-spacing:1px;
+    color:#fff;
+  }
+
+  .car-item .info .meta{
+    font-size:0.68rem;
+    color:#aaa;
+    font-family:sans-serif;
+    margin-top:4px;
+  }
+
+  .car-item .prestige-tag{
+    color:var(--neon-gold);
+    font-weight:700;
+  }
+
+  .car-item button{
+    background:#0a0a0d;
+    border:2px solid var(--neon-pink);
+    color:var(--neon-pink);
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    letter-spacing:1px;
+    font-size:0.75rem;
+    text-shadow:0 0 5px var(--neon-pink);
+    transition: all 0.15s ease;
+    white-space:nowrap;
+  }
+
+  .car-item button:hover:not(:disabled){
+    box-shadow:0 0 15px rgba(255,43,214,0.6);
+    transform: scale(1.05);
+  }
+
+  .car-item button:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+
+  .car-item.owned button{
+    border-color:var(--neon-gold);
+    color:var(--neon-gold);
+    text-shadow:0 0 5px var(--neon-gold);
+  }
+
+  .car-item .partner-btn{
+    background:#0a0a0d;
+    border:2px solid var(--neon-green,#39ff14);
+    color:#39ff14;
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    padding:6px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    letter-spacing:1px;
+    font-size:0.65rem;
+    text-shadow:0 0 5px #39ff14;
+    transition: all 0.15s ease;
+    white-space:nowrap;
+    margin-right:6px;
+  }
+  .car-item .partner-btn:hover:not(:disabled){
+    box-shadow:0 0 15px rgba(57,255,20,0.6);
+    transform: scale(1.05);
+  }
+  .car-item .partner-btn:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+  .car-item .partner-btn.partnered{
+    border-color:#39ff14;
+    color:#39ff14;
+    background:rgba(57,255,20,0.12);
+  }
+  .car-item .btn-group{
+    display:flex;
+    align-items:center;
+  }
+  .car-item .discount-tag{
+    color:#39ff14;
+    font-weight:700;
+    font-size:0.68rem;
+    font-family:sans-serif;
+  }
+
+  /* ---------- Win modal ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+  }
+
+  .modal-box{
+    position:relative;
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:3px solid var(--neon-gold);
+    border-radius:20px;
+    padding:50px 40px;
+    text-align:center;
+    max-width:420px;
+    width:90%;
+    box-shadow:0 0 40px rgba(255,213,0,0.7), 0 0 70px rgba(255,213,0,0.3) inset;
+  }
+
+  .modal-box h2{
+    font-size:2rem;
+    color:var(--neon-gold);
+    text-shadow:0 0 10px var(--neon-gold), 0 0 25px var(--neon-gold), 0 0 45px var(--neon-gold);
+    letter-spacing:2px;
+    margin:0 0 15px;
+  }
+
+  .modal-box p{
+    font-family:sans-serif;
+    color:#ddd;
+    font-size:0.95rem;
+    margin:0 0 30px;
+  }
+
+  .modal-box button{
+    background:#0a0a0d;
+    border:2px solid var(--neon-gold);
+    color:var(--neon-gold);
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    padding:12px 28px;
+    border-radius:10px;
+    cursor:pointer;
+    letter-spacing:2px;
+    text-shadow:0 0 6px var(--neon-gold);
+    transition: all 0.15s ease;
+  }
+
+  .modal-box button:hover{
+    box-shadow:0 0 20px rgba(255,213,0,0.7);
+    transform: scale(1.05);
+  }
+
+  .confetti-piece{
+    position:fixed;
+    top:-20px;
+    width:10px;
+    height:16px;
+    z-index:99;
+    pointer-events:none;
+    animation: confetti-fall linear forwards;
+  }
+
+  @keyframes confetti-fall{
+    0%{ transform: translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform: translateY(110vh) rotate(720deg); opacity:0.9; }
+  }
+
+  /* ---------- Confirm modal ---------- */
+  .confirm-box{
+    border-color:var(--neon-pink);
+    box-shadow:0 0 40px rgba(255,43,214,0.6), 0 0 70px rgba(255,43,214,0.25) inset;
+  }
+
+  .confirm-box h2{
+    color:var(--neon-pink);
+    text-shadow:0 0 10px var(--neon-pink), 0 0 25px var(--neon-pink), 0 0 45px var(--neon-pink);
+    font-size:1.5rem;
+  }
+
+  .confirm-actions{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+  }
+
+  .confirm-actions button{
+    font-family:'Orbitron', sans-serif;
+    font-weight:700;
+    padding:12px 24px;
+    border-radius:10px;
+    cursor:pointer;
+    letter-spacing:1px;
+    transition: all 0.15s ease;
+  }
+
+  .confirm-yes{
+    background:#0a0a0d;
+    border:2px solid var(--neon-green, #39ff14);
+    color:#39ff14;
+    text-shadow:0 0 6px #39ff14;
+  }
+  .confirm-yes:hover{
+    box-shadow:0 0 20px rgba(57,255,20,0.7);
+    transform: scale(1.05);
+  }
+
+  .confirm-no{
+    background:#0a0a0d;
+    border:2px solid var(--neon-red);
+    color:var(--neon-red);
+    text-shadow:0 0 6px var(--neon-red);
+  }
+  .confirm-no:hover{
+    box-shadow:0 0 20px rgba(255,23,68,0.7);
+    transform: scale(1.05);
+  }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-gold);
+    border-radius:12px;
+    padding:16px 26px;
+    text-align:center;
+    box-shadow:0 0 25px rgba(255,213,0,0.6), 0 0 40px rgba(255,213,0,0.25) inset;
+    z-index:110;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .toast.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast .toast-title{
+    font-size:1.1rem;
+    font-weight:900;
+    color:var(--neon-gold);
+    text-shadow:0 0 8px var(--neon-gold), 0 0 18px var(--neon-gold);
+    letter-spacing:2px;
+  }
+
+  .toast .toast-sub{
+    font-size:0.8rem;
+    color:#ddd;
+    font-family:sans-serif;
+    margin-top:4px;
+  }
+
+  footer{
+    position:relative;
+    z-index:1;
+    margin-top:60px;
+    font-size:0.8rem;
+    color:#555;
+    letter-spacing:1px;
+  }
+
+  @media (max-width: 800px){
+    .grid{ grid-template-columns:repeat(2, 1fr); }
+    .row-mid{ grid-template-columns:repeat(1, 1fr); }
+    .main-game{ grid-column:auto; }
+  }
+</style>
+</head>
+<body>
+
+  <h1><span class="flicker-c">C</span><span class="rest">LICKER GAMES</span></h1>
+
+  <!-- CAR CLICKER GAME VIEW -->
+  <div id="carClicker" class="game-view" style="display:flex;">
+
+    <a href="index.html" class="back-link" style="display:inline-block;">&#8592; BACK TO CLICKER GAMES</a>
+
+    <h2 class="game-title">CAR CLICKER</h2>
+
+    <div class="game-wrap">
+
+      <div class="main-col">
+
+        <div class="stat-panel">
+          <div class="label">CARS BUILT</div>
+          <div class="value" id="score">0</div>
+          <div class="label" style="margin-top:10px;">PER CLICK: <span id="perClick">1</span> &nbsp;|&nbsp; PER SECOND: <span id="perSecond">0</span></div>
+        </div>
+
+        <div class="prestige-panel">
+          <div class="label"><span>PRESTIGE</span><span><span id="prestigeValue">0</span> / 100</span></div>
+          <div class="prestige-bar-outer"><div class="prestige-bar-inner" id="prestigeBar"></div></div>
+        </div>
+
+        <div class="car-button" id="carButton">🚗</div>
+
+        <div class="shop">
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">FASTER HANDS</div>
+              <div class="desc">+1 car per click</div>
+            </div>
+            <button id="buyClick">BUY (<span id="costClick">10</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">MECHANIC</div>
+              <div class="desc">+1 car per second, automatically</div>
+            </div>
+            <button id="buyMechanic">BUY (<span id="costMechanic">25</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">TURBO CHARGER</div>
+              <div class="desc">+2 cars per click</div>
+            </div>
+            <button id="buyTurbo">BUY (<span id="costTurbo">30</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">ROBOTIC ARM</div>
+              <div class="desc">+3 cars per second, automatically</div>
+            </div>
+            <button id="buyRoboticArm">BUY (<span id="costRoboticArm">90</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">NITRO BOOST</div>
+              <div class="desc">+5 cars per click</div>
+            </div>
+            <button id="buyNitro">BUY (<span id="costNitro">100</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">ASSEMBLY LINE</div>
+              <div class="desc">+5 cars per second, automatically</div>
+            </div>
+            <button id="buyLine">BUY (<span id="costLine">150</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">PAINT SHOP</div>
+              <div class="desc">+8 cars per second, automatically</div>
+            </div>
+            <button id="buyPaintShop">BUY (<span id="costPaintShop">300</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">TEST DRIVER</div>
+              <div class="desc">+10 cars per click</div>
+            </div>
+            <button id="buyTestDriver">BUY (<span id="costTestDriver">300</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">DETAILING CREW</div>
+              <div class="desc">+12 cars per second, automatically</div>
+            </div>
+            <button id="buyDetailing">BUY (<span id="costDetailing">500</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">IMPORT/EXPORT DEAL</div>
+              <div class="desc">+20 cars per click</div>
+            </div>
+            <button id="buyImportExport">BUY (<span id="costImportExport">900</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">AUTO FACTORY</div>
+              <div class="desc">+25 cars per second, automatically</div>
+            </div>
+            <button id="buyAutoFactory">BUY (<span id="costAutoFactory">1200</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">ROBOT WORKFORCE</div>
+              <div class="desc">+50 cars per second, automatically</div>
+            </div>
+            <button id="buyRobotWorkforce">BUY (<span id="costRobotWorkforce">3000</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">SUPERCAR DIVISION</div>
+              <div class="desc">+50 cars per click</div>
+            </div>
+            <button id="buySupercar">BUY (<span id="costSupercar">4000</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">GLOBAL DEALERSHIP</div>
+              <div class="desc">+100 cars per second, automatically</div>
+            </div>
+            <button id="buyDealership">BUY (<span id="costDealership">7000</span>)</button>
+          </div>
+
+          <div class="upgrade">
+            <div class="info">
+              <div class="name">MEGA FACTORY</div>
+              <div class="desc">+250 cars per second, automatically</div>
+            </div>
+            <button id="buyMegaFactory">BUY (<span id="costMegaFactory">20000</span>)</button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="garage-col">
+        <div class="garage-title">🏁 GARAGE — BUY CARS FOR PRESTIGE</div>
+        <div id="garageList"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- WIN MODAL -->
+  <div id="winModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <h2>YOU'RE A CAR MASTER!</h2>
+      <p>You collected 100 prestige points. The garage bows before you.</p>
+      <button onclick="resetGame()">CONTINUE</button>
+    </div>
+  </div>
+
+  <!-- BUY CONFIRM MODAL -->
+  <div id="confirmModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box confirm-box">
+      <h2 id="confirmText">Buy this car?</h2>
+      <div class="confirm-actions">
+        <button class="confirm-yes" id="confirmYesBtn">YES</button>
+        <button class="confirm-no" onclick="closeConfirm()">NO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast">
+    <div class="toast-title" id="toastTitle">CAR BOUGHT!</div>
+    <div class="toast-sub" id="toastSub">+0 prestige</div>
+  </div>
+
+  <div id="confettiContainer"></div>
+
+  <footer>© CLICKER GAMES — powered by neon and questionable life choices</footer>
+
+  <script>
+    // ---------- View switching ----------
+    function showGame(id){
+      document.getElementById('mainMenu').style.display = 'none';
+      document.querySelectorAll('.game-view').forEach(v => v.style.display = 'none');
+      document.getElementById(id).style.display = 'flex';
+    }
+    function showMenu(){
+      document.querySelectorAll('.game-view').forEach(v => v.style.display = 'none');
+      document.getElementById('mainMenu').style.display = 'block';
+    }
+
+    // ---------- Car Clicker game logic ----------
+    let score = 0;
+    let perClick = 1;
+    let perSecond = 0;
+    let prestige = 0;
+
+    let costClick = 10;
+    let costMechanic = 25;
+    let costLine = 150;
+    let costTurbo = 30;
+    let costRoboticArm = 90;
+    let costNitro = 100;
+    let costPaintShop = 300;
+    let costDetailing = 500;
+    let costTestDriver = 300;
+    let costAutoFactory = 1200;
+    let costImportExport = 900;
+    let costRobotWorkforce = 3000;
+    let costDealership = 7000;
+    let costSupercar = 4000;
+    let costMegaFactory = 20000;
+
+    // ---------- Garage: car collection ----------
+    const cars = [
+      { id:'corolla',  name:'Toyota Corolla',        cost:1200,   prestige:3  },
+      { id:'civic',    name:'Honda Civic',            cost:2000,   prestige:4  },
+      { id:'golf',     name:'VW Golf GTI',            cost:3500,   prestige:5  },
+      { id:'mustang',  name:'Ford Mustang',           cost:6000,   prestige:7  },
+      { id:'wrx',      name:'Subaru WRX',             cost:9000,   prestige:8  },
+      { id:'m3',       name:'BMW M3',                 cost:15000,  prestige:10 },
+      { id:'rs5',      name:'Audi RS5',               cost:25000,  prestige:12 },
+      { id:'amg',      name:'Mercedes-AMG C63',       cost:40000,  prestige:14 },
+      { id:'911',      name:'Porsche 911',            cost:65000,  prestige:16 },
+      { id:'huracan',  name:'Lamborghini Huracán',    cost:85000,  prestige:20 },
+      { id:'ferrari',  name:'Ferrari',                cost:120000, prestige:30, isFerrari:true },
+    ];
+    const ownedCars = {};
+    const partnerships = {};
+
+    const scoreEl = document.getElementById('score');
+    const perClickEl = document.getElementById('perClick');
+    const perSecondEl = document.getElementById('perSecond');
+    const prestigeValueEl = document.getElementById('prestigeValue');
+    const prestigeBarEl = document.getElementById('prestigeBar');
+
+    const costClickEl = document.getElementById('costClick');
+    const costMechanicEl = document.getElementById('costMechanic');
+    const costLineEl = document.getElementById('costLine');
+
+    const buyClickBtn = document.getElementById('buyClick');
+    const buyMechanicBtn = document.getElementById('buyMechanic');
+    const buyLineBtn = document.getElementById('buyLine');
+
+    // ---------- Extra upgrades (generic) ----------
+    const extraUpgrades = [
+      { key:'Turbo',          type:'click',  amount:2,   costVar:'costTurbo',          growth:1.6 },
+      { key:'RoboticArm',     type:'second', amount:3,   costVar:'costRoboticArm',     growth:1.65 },
+      { key:'Nitro',          type:'click',  amount:5,   costVar:'costNitro',          growth:1.6 },
+      { key:'PaintShop',      type:'second', amount:8,   costVar:'costPaintShop',      growth:1.65 },
+      { key:'Detailing',      type:'second', amount:12,  costVar:'costDetailing',      growth:1.65 },
+      { key:'TestDriver',     type:'click',  amount:10,  costVar:'costTestDriver',     growth:1.6 },
+      { key:'AutoFactory',    type:'second', amount:25,  costVar:'costAutoFactory',    growth:1.7 },
+      { key:'ImportExport',   type:'click',  amount:20,  costVar:'costImportExport',   growth:1.6 },
+      { key:'RobotWorkforce', type:'second', amount:50,  costVar:'costRobotWorkforce', growth:1.7 },
+      { key:'Dealership',     type:'second', amount:100, costVar:'costDealership',     growth:1.75 },
+      { key:'Supercar',       type:'click',  amount:50,  costVar:'costSupercar',       growth:1.6 },
+      { key:'MegaFactory',    type:'second', amount:250, costVar:'costMegaFactory',    growth:1.8 },
+    ];
+
+    const costVars = {
+      costTurbo, costRoboticArm, costNitro, costPaintShop, costDetailing,
+      costTestDriver, costAutoFactory, costImportExport, costRobotWorkforce,
+      costDealership, costSupercar, costMegaFactory
+    };
+
+    extraUpgrades.forEach(u => {
+      const btn = document.getElementById('buy' + u.key);
+      btn.addEventListener('click', () => {
+        const cost = costVars[u.costVar];
+        if (score >= cost){
+          score -= cost;
+          if (u.type === 'click') perClick += u.amount;
+          else perSecond += u.amount;
+          costVars[u.costVar] = Math.floor(cost * u.growth);
+          updateDisplay();
+        }
+      });
+    });
+
+    const carButton = document.getElementById('carButton');
+    const garageListEl = document.getElementById('garageList');
+    const winModal = document.getElementById('winModal');
+
+    function getCarCost(car){
+      return partnerships[car.id] ? Math.floor(car.cost * 0.8) : car.cost;
+    }
+
+    function renderGarage(){
+      garageListEl.innerHTML = '';
+      cars.forEach(car => {
+        const ownedCount = ownedCars[car.id] || 0;
+        const maxed = ownedCount >= 2;
+        const partnered = !!partnerships[car.id];
+        const effectiveCost = getCarCost(car);
+        const partnerCost = Math.floor(car.cost / 2);
+        const div = document.createElement('div');
+        div.className = 'car-item' + (ownedCount > 0 ? ' owned' : '') + (car.isFerrari ? ' ferrari' : '') + (partnered ? ' partnered' : '');
+        div.innerHTML = `
+          <div class="info">
+            <div class="name">${car.isFerrari ? '🏎️' : '🚗'} ${car.name}</div>
+            <div class="meta">Cost: ${effectiveCost.toLocaleString()} cars${partnered ? ' <span class="discount-tag">(20% off)</span>' : ''} &nbsp;|&nbsp; <span class="prestige-tag">+${car.prestige} prestige</span></div>
+          </div>
+          <div class="btn-group">
+            <button class="partner-btn ${partnered ? 'partnered' : ''}" ${partnered ? 'disabled' : (score < partnerCost ? 'disabled' : '')}>
+              ${partnered ? 'PARTNERED' : 'PARTNER (' + partnerCost.toLocaleString() + ')'}
+            </button>
+            <button ${maxed ? 'disabled' : (score < effectiveCost ? 'disabled' : '')}>
+              ${maxed ? 'OWNED x2' : ownedCount === 1 ? 'BUY (2nd)' : 'BUY'}
+            </button>
+          </div>
+        `;
+        if (!partnered){
+          div.querySelector('.partner-btn').addEventListener('click', () => buyPartnership(car));
+        }
+        if (!maxed){
+          div.querySelector('.btn-group button:not(.partner-btn)').addEventListener('click', () => buyCar(car));
+        }
+        garageListEl.appendChild(div);
+      });
+    }
+
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmText = document.getElementById('confirmText');
+    const confirmYesBtn = document.getElementById('confirmYesBtn');
+    let pendingCar = null;
+    let pendingPartnership = false;
+
+    function buyCar(car){
+      const cost = getCarCost(car);
+      if ((ownedCars[car.id] || 0) >= 2 || score < cost) return;
+      pendingCar = car;
+      const purchaseNum = (ownedCars[car.id] || 0) + 1;
+      confirmText.textContent = `Are you sure you want to buy this ${car.name}? (${cost.toLocaleString()} cars — purchase #${purchaseNum})`;
+      confirmModal.style.display = 'flex';
+    }
+
+    function buyPartnership(car){
+      const partnerCost = Math.floor(car.cost / 2);
+      if (partnerships[car.id] || score < partnerCost) return;
+      pendingCar = car;
+      pendingPartnership = true;
+      confirmText.textContent = `Partner with ${car.name}? (${partnerCost.toLocaleString()} cars — get 20% off this car forever)`;
+      confirmModal.style.display = 'flex';
+    }
+
+    function closeConfirm(){
+      confirmModal.style.display = 'none';
+      pendingCar = null;
+    }
+
+    confirmYesBtn.addEventListener('click', () => {
+      if (!pendingCar) return;
+      const car = pendingCar;
+      const isPartner = pendingPartnership;
+      confirmModal.style.display = 'none';
+      pendingCar = null;
+      pendingPartnership = false;
+
+      if (isPartner){
+        const partnerCost = Math.floor(car.cost / 2);
+        if (partnerships[car.id] || score < partnerCost) return;
+        score -= partnerCost;
+        partnerships[car.id] = true;
+        updateDisplay();
+        showToast('PARTNERSHIP!', `${car.name} cars now 20% off forever`);
+        return;
+      }
+
+      const cost = getCarCost(car);
+      if ((ownedCars[car.id] || 0) >= 2 || score < cost) return;
+      score -= cost;
+      ownedCars[car.id] = (ownedCars[car.id] || 0) + 1;
+      prestige += car.prestige;
+      updateDisplay();
+      showToast('CAR BOUGHT!', `+${car.prestige} prestige added`);
+      checkWin();
+    });
+
+    let toastTimeout = null;
+    function showToast(title, sub){
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastSub').textContent = sub;
+      toast.classList.add('show');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function checkWin(){
+      if (prestige >= 100){
+        showWin();
+      }
+    }
+
+    function showWin(){
+      winModal.style.display = 'flex';
+      launchConfetti();
+    }
+
+    function launchConfetti(){
+      const container = document.getElementById('confettiContainer');
+      const colors = ['#00e5ff', '#ffd500', '#ff1744', '#ff2bd6', '#39ff14'];
+      const count = 120;
+      for (let i = 0; i < count; i++){
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        piece.style.animationDelay = (Math.random() * 1.2) + 's';
+        piece.style.opacity = 0.85;
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 5000);
+      }
+    }
+
+    function resetGame(){
+      score = 0;
+      perClick = 1;
+      perSecond = 0;
+      prestige = 0;
+      costClick = 10;
+      costMechanic = 25;
+      costLine = 150;
+      extraUpgrades.forEach(u => {
+        const defaults = {
+          costTurbo:30, costRoboticArm:90, costNitro:100, costPaintShop:300,
+          costDetailing:500, costTestDriver:300, costAutoFactory:1200,
+          costImportExport:900, costRobotWorkforce:3000, costDealership:7000,
+          costSupercar:4000, costMegaFactory:20000
+        };
+        costVars[u.costVar] = defaults[u.costVar];
+      });
+      for (const key in ownedCars) delete ownedCars[key];
+      for (const key in partnerships) delete partnerships[key];
+      winModal.style.display = 'none';
+      document.getElementById('confettiContainer').innerHTML = '';
+      updateDisplay();
+    }
+
+    function updateDisplay(){
+      scoreEl.textContent = Math.floor(score);
+      perClickEl.textContent = perClick;
+      perSecondEl.textContent = perSecond;
+
+      prestigeValueEl.textContent = Math.min(prestige, 100);
+      prestigeBarEl.style.width = Math.min(prestige, 100) + '%';
+
+      costClickEl.textContent = costClick;
+      costMechanicEl.textContent = costMechanic;
+      costLineEl.textContent = costLine;
+
+      buyClickBtn.disabled = score < costClick;
+      buyMechanicBtn.disabled = score < costMechanic;
+      buyLineBtn.disabled = score < costLine;
+
+      extraUpgrades.forEach(u => {
+        const cost = costVars[u.costVar];
+        document.getElementById('cost' + u.key).textContent = cost;
+        document.getElementById('buy' + u.key).disabled = score < cost;
+      });
+
+      renderGarage();
+    }
+
+    carButton.addEventListener('click', () => {
+      score += perClick;
+      carButton.classList.remove('bump');
+      void carButton.offsetWidth; // restart animation
+      carButton.classList.add('bump');
+      updateDisplay();
+    });
+
+    buyClickBtn.addEventListener('click', () => {
+      if (score >= costClick){
+        score -= costClick;
+        perClick += 1;
+        costClick = Math.floor(costClick * 1.6);
+        updateDisplay();
+      }
+    });
+
+    buyMechanicBtn.addEventListener('click', () => {
+      if (score >= costMechanic){
+        score -= costMechanic;
+        perSecond += 1;
+        costMechanic = Math.floor(costMechanic * 1.7);
+        updateDisplay();
+      }
+    });
+
+    buyLineBtn.addEventListener('click', () => {
+      if (score >= costLine){
+        score -= costLine;
+        perSecond += 5;
+        costLine = Math.floor(costLine * 1.8);
+        updateDisplay();
+      }
+    });
+
+    setInterval(() => {
+      score += perSecond / 10;
+      updateDisplay();
+    }, 100);
+
+    updateDisplay();
+  </script>
+
+</body>
+</html>
