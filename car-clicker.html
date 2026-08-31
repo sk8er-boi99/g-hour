@@ -406,7 +406,6 @@
 
   .upgrade button:hover:not(:disabled){
     box-shadow:0 0 15px rgba(57,255,20,0.6);
-    transform: scale(1.05);
   }
 
   .upgrade button:disabled{
@@ -538,7 +537,6 @@
 
   .car-item button:hover:not(:disabled){
     box-shadow:0 0 15px rgba(255,43,214,0.6);
-    transform: scale(1.05);
   }
 
   .car-item button:disabled{
@@ -570,7 +568,6 @@
   }
   .car-item .partner-btn:hover:not(:disabled){
     box-shadow:0 0 15px rgba(57,255,20,0.6);
-    transform: scale(1.05);
   }
   .car-item .partner-btn:disabled{
     opacity:0.35;
@@ -1012,6 +1009,14 @@
     const ownedCars = {};
     const partnerships = {};
 
+    const PARTNER_WINDOW = 20; // seconds per minute the offer is available
+    function partnerWindowOpen(){
+      return (Math.floor(Date.now() / 1000) % 60) < PARTNER_WINDOW;
+    }
+    function partnerNextWindowCountdown(){
+      return 60 - (Math.floor(Date.now() / 1000) % 60);
+    }
+
     const scoreEl = document.getElementById('score');
     const perClickEl = document.getElementById('perClick');
     const perSecondEl = document.getElementById('perSecond');
@@ -1074,32 +1079,39 @@
       garageListEl.innerHTML = '';
       cars.forEach(car => {
         const ownedCount = ownedCars[car.id] || 0;
-        const maxed = ownedCount >= 2;
         const partnered = !!partnerships[car.id];
+        const carOwned = ownedCount > 0;
+        const windowOpen = partnerWindowOpen();
         const effectiveCost = getCarCost(car);
         const partnerCost = Math.floor(car.cost / 2);
         const div = document.createElement('div');
         div.className = 'car-item' + (ownedCount > 0 ? ' owned' : '') + (car.isFerrari ? ' ferrari' : '') + (partnered ? ' partnered' : '');
+        const partnerBtnDisabled = partnered ? true : (!carOwned || !windowOpen || score < partnerCost);
+        const partnerBtnText = partnered
+          ? 'PARTNERED'
+          : !carOwned
+            ? 'OWN FIRST'
+            : !windowOpen
+              ? `OFFER IN ${partnerNextWindowCountdown()}s`
+              : `PARTNER (${partnerCost.toLocaleString()})`;
         div.innerHTML = `
           <div class="info">
-            <div class="name">${car.isFerrari ? '🏎️' : '🚗'} ${car.name}</div>
+            <div class="name">${car.isFerrari ? '🏎️' : '🚗'} ${car.name}${ownedCount > 0 ? ' (x' + ownedCount + ')' : ''}</div>
             <div class="meta">Cost: ${effectiveCost.toLocaleString()} cars${partnered ? ' <span class="discount-tag">(20% off)</span>' : ''} &nbsp;|&nbsp; <span class="prestige-tag">+${car.prestige} prestige</span></div>
           </div>
           <div class="btn-group">
-            <button class="partner-btn ${partnered ? 'partnered' : ''}" ${partnered ? 'disabled' : (score < partnerCost ? 'disabled' : '')}>
-              ${partnered ? 'PARTNERED' : 'PARTNER (' + partnerCost.toLocaleString() + ')'}
+            <button class="partner-btn ${partnered ? 'partnered' : ''}" ${partnerBtnDisabled ? 'disabled' : ''}>
+              ${partnerBtnText}
             </button>
-            <button ${maxed ? 'disabled' : (score < effectiveCost ? 'disabled' : '')}>
-              ${maxed ? 'OWNED x2' : ownedCount === 1 ? 'BUY (2nd)' : 'BUY'}
+            <button ${score < effectiveCost ? 'disabled' : ''}>
+              BUY
             </button>
           </div>
         `;
-        if (!partnered){
+        if (!partnered && carOwned && windowOpen){
           div.querySelector('.partner-btn').addEventListener('click', () => buyPartnership(car));
         }
-        if (!maxed){
-          div.querySelector('.btn-group button:not(.partner-btn)').addEventListener('click', () => buyCar(car));
-        }
+        div.querySelector('.btn-group button:not(.partner-btn)').addEventListener('click', () => buyCar(car));
         garageListEl.appendChild(div);
       });
     }
@@ -1112,7 +1124,7 @@
 
     function buyCar(car){
       const cost = getCarCost(car);
-      if ((ownedCars[car.id] || 0) >= 2 || score < cost) return;
+      if (score < cost) return;
       pendingCar = car;
       const purchaseNum = (ownedCars[car.id] || 0) + 1;
       confirmText.textContent = `Are you sure you want to buy this ${car.name}? (${cost.toLocaleString()} cars — purchase #${purchaseNum})`;
@@ -1121,7 +1133,8 @@
 
     function buyPartnership(car){
       const partnerCost = Math.floor(car.cost / 2);
-      if (partnerships[car.id] || score < partnerCost) return;
+      const carOwned = (ownedCars[car.id] || 0) > 0;
+      if (partnerships[car.id] || !carOwned || !partnerWindowOpen() || score < partnerCost) return;
       pendingCar = car;
       pendingPartnership = true;
       confirmText.textContent = `Partner with ${car.name}? (${partnerCost.toLocaleString()} cars — get 20% off this car forever)`;
@@ -1143,7 +1156,8 @@
 
       if (isPartner){
         const partnerCost = Math.floor(car.cost / 2);
-        if (partnerships[car.id] || score < partnerCost) return;
+        const carOwned = (ownedCars[car.id] || 0) > 0;
+        if (partnerships[car.id] || !carOwned || !partnerWindowOpen() || score < partnerCost) return;
         score -= partnerCost;
         partnerships[car.id] = true;
         updateDisplay();
@@ -1152,7 +1166,7 @@
       }
 
       const cost = getCarCost(car);
-      if ((ownedCars[car.id] || 0) >= 2 || score < cost) return;
+      if (score < cost) return;
       score -= cost;
       ownedCars[car.id] = (ownedCars[car.id] || 0) + 1;
       prestige += car.prestige;
@@ -1218,6 +1232,8 @@
       });
       for (const key in ownedCars) delete ownedCars[key];
       for (const key in partnerships) delete partnerships[key];
+      eggUsed = false;
+      eggBuffer = '';
       winModal.style.display = 'none';
       document.getElementById('confettiContainer').innerHTML = '';
       updateDisplay();
@@ -1287,6 +1303,26 @@
       score += perSecond / 10;
       updateDisplay();
     }, 100);
+
+    // ---------- Easter egg: type "free-stuff" for a 40,000 car bonus ----------
+    let eggBuffer = '';
+    let eggUsed = false;
+    const eggCode = 'free-stuff';
+    document.addEventListener('keydown', (e) => {
+      if (e.key && e.key.length === 1){
+        eggBuffer += e.key.toLowerCase();
+        if (eggBuffer.length > eggCode.length){
+          eggBuffer = eggBuffer.slice(eggBuffer.length - eggCode.length);
+        }
+        if (eggBuffer === eggCode && !eggUsed){
+          eggUsed = true;
+          score += 40000;
+          updateDisplay();
+          showToast('FREE STUFF!', '+40,000 cars added');
+          launchConfetti();
+        }
+      }
+    });
 
     updateDisplay();
   </script>
