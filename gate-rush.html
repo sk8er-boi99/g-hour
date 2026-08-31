@@ -589,14 +589,14 @@ function drawPlane(plane) {
 function drawExit() {
   ctx.save();
   const ex = EXIT_X;
-  const ey = EXIT_Y + 12;
+  const ey = EXIT_GATE_Y;
   const exitCount = countExitPassengers();
   const warn = exitCount / MAX_EXIT_QUEUE;
 
   if (warn > 0.4) {
     ctx.fillStyle = `rgba(255, 68, 102, ${0.08 + warn * 0.12})`;
     ctx.beginPath();
-    ctx.arc(ex, ey - 8, 22 + warn * 8, 0, Math.PI * 2);
+    ctx.arc(ex, ey - 8, 26 + warn * 8, 0, Math.PI * 2);
     ctx.fill();
   }
 
