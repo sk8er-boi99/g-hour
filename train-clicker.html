@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLICKER GAMES</title>
+<style>
+  :root{
+    --bg:#0a0a12;
+    --panel:#12121e;
+    --panel2:#181828;
+    --neon:#ffb020;
+    --neon2:#ff5f3f;
+    --gold:#ffd23f;
+    --text:#eaeaf5;
+    --muted:#8a8aa3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,176,32,0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(255,95,63,0.08), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  header{
+    text-align:center;
+    padding:24px 16px 8px;
+  }
+  h1{
+    margin:0;
+    font-size:2.4rem;
+    letter-spacing:2px;
+    color:var(--neon);
+    text-shadow:0 0 10px rgba(255,176,32,0.6), 0 0 30px rgba(255,176,32,0.3);
+  }
+  .back{
+    display:inline-block;
+    margin-top:10px;
+    color:var(--muted);
+    text-decoration:none;
+    font-size:0.85rem;
+    border:1px solid #2a2a3d;
+    padding:6px 14px;
+    border-radius:20px;
+    transition:0.2s;
+  }
+  .back:hover{ color:var(--neon); border-color:var(--neon); }
+
+  h2.game-title{
+    text-align:center;
+    letter-spacing:3px;
+    color:var(--neon2);
+    text-shadow:0 0 12px rgba(255,95,63,0.5);
+    margin:20px 0 4px;
+  }
+
+  .stats{
+    text-align:center;
+    margin-bottom:6px;
+  }
+  .stats .label{
+    color:var(--muted);
+    font-size:0.8rem;
+    letter-spacing:2px;
+  }
+  .stats .count{
+    font-size:3rem;
+    font-weight:800;
+    color:var(--neon);
+    text-shadow:0 0 12px rgba(255,176,32,0.5);
+  }
+  .rates{
+    color:var(--muted);
+    font-size:0.85rem;
+    text-align:center;
+    margin-bottom:8px;
+  }
+
+  .prestige-bar-wrap{
+    max-width:400px;
+    margin:0 auto 20px;
+    padding:0 16px;
+  }
+  .prestige-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.75rem;
+    color:var(--gold);
+    margin-bottom:4px;
+  }
+  .prestige-track{
+    background:#1e1e2e;
+    border-radius:10px;
+    height:10px;
+    overflow:hidden;
+    border:1px solid #2a2a3d;
+  }
+  .prestige-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--gold), #ff9f3f);
+    box-shadow:0 0 10px rgba(255,210,63,0.6);
+    width:0%;
+    transition:width 0.3s;
+  }
+
+  .click-zone{
+    display:flex;
+    justify-content:center;
+    margin:20px 0 30px;
+  }
+  #clickBtn{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #1c2b20, #0c140f);
+    border:3px solid var(--neon);
+    box-shadow:0 0 25px rgba(255,176,32,0.5), inset 0 0 20px rgba(255,176,32,0.15);
+    font-size:5rem;
+    cursor:pointer;
+    user-select:none;
+    transition:transform 0.08s;
+    color:white;
+  }
+  #clickBtn:active{ transform:scale(0.92); }
+
+  .float{
+    position:fixed;
+    pointer-events:none;
+    font-weight:700;
+    color:var(--neon);
+    text-shadow:0 0 8px rgba(255,176,32,0.8);
+    animation:floatUp 0.9s ease-out forwards;
+    z-index:50;
+  }
+  @keyframes floatUp{
+    0%{ opacity:1; transform:translateY(0); }
+    100%{ opacity:0; transform:translateY(-60px); }
+  }
+
+  .section-title{
+    text-align:center;
+    color:var(--neon2);
+    letter-spacing:2px;
+    font-size:0.95rem;
+    margin:30px 0 14px;
+    text-shadow:0 0 8px rgba(255,95,63,0.4);
+  }
+
+  .shop{
+    max-width:520px;
+    margin:0 auto;
+    padding:0 16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .item{
+    background:linear-gradient(180deg, var(--panel2), var(--panel));
+    border:1px solid #2a2a3d;
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    transition:0.15s;
+  }
+  .item.affordable{
+    border-color:rgba(255,176,32,0.5);
+    box-shadow:0 0 12px rgba(255,176,32,0.15);
+  }
+  .item.locked{ opacity:0.45; }
+  .item-info .name{
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--text);
+    font-size:0.95rem;
+  }
+  .item-info .desc{
+    color:var(--muted);
+    font-size:0.78rem;
+    margin-top:2px;
+  }
+  .item-info .owned{
+    color:var(--neon2);
+    font-size:0.72rem;
+    margin-top:2px;
+  }
+  .buy-btn{
+    background:transparent;
+    border:1px solid var(--neon);
+    color:var(--neon);
+    padding:8px 14px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:0.15s;
+  }
+  .buy-btn:hover{ background:rgba(255,176,32,0.12); }
+  .buy-btn:disabled{
+    border-color:#3a3a4d;
+    color:#4a4a5d;
+    cursor:not-allowed;
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(5,5,10,0.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--neon);
+    box-shadow:0 0 30px rgba(255,176,32,0.4);
+    border-radius:16px;
+    padding:28px 30px;
+    max-width:320px;
+    text-align:center;
+  }
+  .modal h3{ color:var(--neon); margin-top:0; }
+  .modal p{ color:var(--muted); font-size:0.9rem; }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:16px;
+  }
+  .modal-actions button{
+    padding:8px 20px;
+    border-radius:10px;
+    border:1px solid var(--neon);
+    background:transparent;
+    color:var(--neon);
+    font-weight:700;
+    cursor:pointer;
+  }
+  .modal-actions button.no{ border-color:#555; color:var(--muted); }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.75rem;
+    margin-top:50px;
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CLICKER GAMES</h1>
+  <a class="back" href="index.html">← BACK TO CLICKER GAMES</a>
+</header>
+
+<h2 class="game-title">🚂 TRAIN CLICKER</h2>
+
+<div class="stats">
+  <div class="label">TRAINS BUILT</div>
+  <div class="count" id="count">0</div>
+</div>
+<div class="rates">PER CLICK: <span id="perClick">1</span> | PER SECOND: <span id="perSecond">0</span></div>
+
+<div class="prestige-bar-wrap">
+  <div class="prestige-label"><span>PRESTIGE</span><span id="prestigeText">0 / 100</span></div>
+  <div class="prestige-track"><div class="prestige-fill" id="prestigeFill"></div></div>
+</div>
+
+<div class="click-zone">
+  <button id="clickBtn">🚂</button>
+</div>
+
+<div class="section-title">🚉 RAIL YARD — BUY UPGRADES</div>
+<div class="shop" id="shop"></div>
+
+<div class="modal-overlay" id="prestigeModal">
+  <div class="modal">
+    <h3>YOU'RE A RAIL BARON!</h3>
+    <p>You collected 100 prestige points. The rail yard bows before you.</p>
+    <div class="modal-actions"><button onclick="closePrestige()">CONTINUE</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <h3>Buy this upgrade?</h3>
+    <p id="buyModalDesc"></p>
+    <div class="modal-actions">
+      <button class="no" onclick="closeBuyModal()">NO</button>
+      <button onclick="confirmBuy()">YES</button>
+    </div>
+  </div>
+</div>
+
+<footer>© CLICKER GAMES — powered by neon and questionable life choices</footer>
+
+<script>
+let count = 0;
+let perClick = 1;
+let perSecond = 0;
+let prestige = 0;
+let pendingItem = null;
+
+const items = [
+  {id:'lever', name:'OILED LEVER', desc:'+1 train per click', cost:10, click:1, sec:0, owned:0},
+  {id:'stoker', name:'STOKER', desc:'+1 train per second, automatically', cost:25, click:0, sec:1, owned:0},
+  {id:'coal', name:'BETTER COAL', desc:'+2 trains per click', cost:30, click:2, sec:0, owned:0},
+  {id:'signalman', name:'SIGNALMAN', desc:'+3 trains per second, automatically', cost:90, click:0, sec:3, owned:0},
+  {id:'rails', name:'REINFORCED RAILS', desc:'+5 trains per click', cost:100, click:5, sec:0, owned:0},
+  {id:'workshop', name:'LOCO WORKSHOP', desc:'+5 trains per second, automatically', cost:150, click:0, sec:5, owned:0},
+  {id:'diesel', name:'DIESEL UPGRADE', desc:'+8 trains per second, automatically', cost:300, click:0, sec:8, owned:0},
+  {id:'conductor', name:'EXPRESS CONDUCTOR', desc:'+10 trains per click', cost:300, click:10, sec:0, owned:0},
+  {id:'maintenance', name:'MAINTENANCE CREW', desc:'+12 trains per second, automatically', cost:500, click:0, sec:12, owned:0},
+  {id:'freight', name:'FREIGHT CONTRACT', desc:'+20 trains per click', cost:900, click:20, sec:0, owned:0},
+  {id:'factory', name:'LOCOMOTIVE FACTORY', desc:'+25 trains per second, automatically', cost:1200, click:0, sec:25, owned:0},
+  {id:'robots', name:'ROBOT WORKFORCE', desc:'+50 trains per second, automatically', cost:3000, click:0, sec:50, owned:0},
+  {id:'bullet', name:'BULLET TRAIN DIVISION', desc:'+50 trains per click', cost:4000, click:50, sec:0, owned:0},
+  {id:'network', name:'NATIONAL RAIL NETWORK', desc:'+100 trains per second, automatically', cost:7000, click:0, sec:100, owned:0},
+  {id:'mega', name:'MEGA RAIL HUB', desc:'+250 trains per second, automatically', cost:20000, click:0, sec:250, owned:0}
+];
+
+function fmt(n){
+  return Math.floor(n).toLocaleString();
+}
+
+function render(){
+  document.getElementById('count').textContent = fmt(count);
+  document.getElementById('perClick').textContent = fmt(perClick);
+  document.getElementById('perSecond').textContent = fmt(perSecond);
+  document.getElementById('prestigeText').textContent = `${Math.min(prestige,100)} / 100`;
+  document.getElementById('prestigeFill').style.width = Math.min(prestige,100) + '%';
+
+  const shop = document.getElementById('shop');
+  shop.innerHTML = '';
+  items.forEach(item => {
+    const affordable = count >= item.cost;
+    const div = document.createElement('div');
+    div.className = 'item ' + (affordable ? 'affordable' : 'locked');
+    div.innerHTML = `
+      <div class="item-info">
+        <div class="name">${item.name}</div>
+        <div class="desc">${item.desc}</div>
+        <div class="owned">OWNED: ${item.owned}</div>
+      </div>
+      <button class="buy-btn" ${affordable ? '' : 'disabled'} data-id="${item.id}">BUY (${fmt(item.cost)})</button>
+    `;
+    shop.appendChild(div);
+  });
+  shop.querySelectorAll('.buy-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openBuyModal(btn.dataset.id));
+  });
+}
+
+function openBuyModal(id){
+  const item = items.find(i=>i.id===id);
+  if(!item || count < item.cost) return;
+  pendingItem = item;
+  document.getElementById('buyModalDesc').textContent = `${item.name} — ${item.desc} for ${fmt(item.cost)} trains.`;
+  document.getElementById('buyModal').classList.add('show');
+}
+function closeBuyModal(){
+  pendingItem = null;
+  document.getElementById('buyModal').classList.remove('show');
+}
+function confirmBuy(){
+  if(!pendingItem) return;
+  const item = pendingItem;
+  if(count >= item.cost){
+    count -= item.cost;
+    item.owned += 1;
+    perClick += item.click;
+    perSecond += item.sec;
+    item.cost = Math.floor(item.cost * 1.65);
+    if(item.click > 0){
+      prestige = Math.min(100, prestige + 1);
+      checkPrestige();
+    }
+  }
+  closeBuyModal();
+  render();
+}
+
+function checkPrestige(){
+  if(prestige >= 100){
+    document.getElementById('prestigeModal').classList.add('show');
+  }
+}
+function closePrestige(){
+  document.getElementById('prestigeModal').classList.remove('show');
+}
+
+document.getElementById('clickBtn').addEventListener('click', (e)=>{
+  count += perClick;
+  spawnFloat(e.clientX, e.clientY, '+' + fmt(perClick));
+  render();
+});
+
+function spawnFloat(x, y, text){
+  const el = document.createElement('div');
+  el.className = 'float';
+  el.textContent = text;
+  el.style.left = (x - 10) + 'px';
+  el.style.top = (y - 10) + 'px';
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), 900);
+}
+
+setInterval(()=>{
+  if(perSecond > 0){
+    count += perSecond;
+    render();
+  }
+}, 1000);
+
+render();
+</script>
+</body>
+</html>
