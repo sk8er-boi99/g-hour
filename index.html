@@ -246,7 +246,7 @@
 
   <div class="grid">
     <a href="car-clicker.html" class="cell cell-link" style="text-decoration:none;">🚗 CAR CLICKER</a>
-    <div class="cell">Coming Soon</div>
+    <a href="cricket-clicker.html" class="cell cell-link" style="text-decoration:none;">🏏 CRICKET CLICKER</a>
     <div class="cell">Coming Soon</div>
     <div class="cell">Coming Soon</div>
   </div>
@@ -269,6 +269,41 @@
   </div>
 
   <footer>© CLICKER GAMES — powered by neon and questionable life choices</footer>
+
+  <div id="theoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:linear-gradient(160deg,#0b0b10,#08080c); border:3px solid var(--neon-gold); border-radius:20px; padding:50px 40px; text-align:center; max-width:90%; box-shadow:0 0 40px rgba(255,213,0,0.7);">
+      <h2 style="margin:0 0 15px; color:var(--neon-gold); text-shadow:0 0 10px var(--neon-gold),0 0 25px var(--neon-gold); font-size:2rem; letter-spacing:2px;">go say to theo</h2>
+      <p style="margin:0 0 30px; font-size:2.5rem; font-weight:900; color:#fff; text-shadow:0 0 12px var(--neon-pink),0 0 30px var(--neon-pink); letter-spacing:3px;">GO JULIAN</p>
+      <button id="theoCloseBtn" style="background:#0a0a0d; border:2px solid var(--neon-gold); color:var(--neon-gold); font-family:'Orbitron',sans-serif; font-weight:700; padding:12px 28px; border-radius:10px; cursor:pointer; letter-spacing:2px; text-shadow:0 0 6px var(--neon-gold);">CLOSE</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const code = 'theo is the best';
+      let buffer = '';
+      const modal = document.getElementById('theoModal');
+      const closeBtn = document.getElementById('theoCloseBtn');
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key && e.key.length === 1){
+          buffer += e.key.toLowerCase();
+          if (buffer.length > code.length){
+            buffer = buffer.slice(buffer.length - code.length);
+          }
+          if (buffer === code){
+            buffer = '';
+            modal.style.display = 'flex';
+          }
+        }
+      });
+
+      function closeModal(){ modal.style.display = 'none'; }
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    })();
+  </script>
 
 </body>
 </html>
