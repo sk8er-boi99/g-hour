@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PickADoor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --ink:#0a0906; --stone:#1c1a16; --stoneLight:#2c2822;
+    --parchment:#e8dfc8; --parchmentDim:#a99d80;
+    --gold:#c9932e; --goldBright:#e8b453;
+    --moss:#3d5a3a; --mossDark:#24371f;
+    --blood:#8a2f2f; --bloodBright:#c24545;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:linear-gradient(180deg,#241a2e 0%, #1c140d 260px, var(--ink) 260px); font-family:'EB Garamond', serif; color:var(--parchment); }
+  h1,h2,h3,.cinzel { font-family:'Cinzel', serif; }
+
+  /* cartoony castle skyline banner */
+  .skyBanner {
+    height:150px; position:relative; overflow:hidden;
+    background:linear-gradient(180deg, #5b3d78 0%, #a1607a 42%, #dd9a5b 72%, #2c2116 100%);
+    border-bottom:4px solid var(--gold);
+    box-shadow:0 4px 18px #00000090;
+  }
+  .skyBanner .sun { position:absolute; top:22px; right:80px; width:46px; height:46px; border-radius:50%; background:#ffe1a8; box-shadow:0 0 30px 10px #ffe1a866; }
+  .skyBanner .cloud { position:absolute; background:#ffffff33; border-radius:50px; }
+  .skyBanner svg { position:absolute; bottom:-2px; left:0; width:100%; height:92px; }
+
+  .wrap { max-width:900px; margin:0 auto; padding:24px 16px; }
+  .headerRow { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:10px; }
+  .title { font-size:26px; letter-spacing:3px; margin:0; color:var(--parchment); text-shadow:0 2px 6px #00000090; }
+  .coin { color:var(--goldBright); font-weight:700; letter-spacing:.5px; }
+  .tabs { display:flex; gap:6px; margin-bottom:2px; }
+  .tab-btn {
+    font-family:'Cinzel',serif; font-weight:700; font-size:13px; letter-spacing:1.5px;
+    text-transform:uppercase; padding:10px 18px; background:transparent; color:var(--parchmentDim);
+    border:1px solid var(--stoneLight); border-radius:6px 6px 0 0; cursor:pointer;
+  }
+  .tab-btn.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+  .btn-primary {
+    font-family:'Cinzel',serif; font-weight:700; font-size:13px; letter-spacing:1px;
+    text-transform:uppercase; padding:12px 26px; background:var(--gold); color:var(--ink);
+    border:none; border-radius:6px; cursor:pointer; box-shadow:0 3px 0 #8a6a1f;
+  }
+  .btn-primary:disabled { opacity:.4; cursor:default; box-shadow:none; }
+  .btn-secondary {
+    font-family:'Cinzel',serif; font-weight:700; font-size:12px; letter-spacing:1px;
+    text-transform:uppercase; padding:10px 20px; background:transparent; color:var(--goldBright);
+    border:1px solid var(--gold); border-radius:6px; cursor:pointer;
+  }
+  .btn-secondary:disabled { opacity:.4; cursor:default; }
+
+  /* Chance Hall — unchanged look, per request */
+  .doorsPanel {
+    background:radial-gradient(ellipse at 50% 0%, #14110c 0%, var(--ink) 70%);
+    min-height:520px; padding:36px 24px; display:flex; flex-direction:column;
+    align-items:center; gap:24px;
+  }
+  .doorRow { display:flex; gap:28px; }
+  .door {
+    width:120px; height:170px; position:relative; border:3px solid var(--gold);
+    border-top-left-radius:60px; border-top-right-radius:60px;
+    background:linear-gradient(180deg, var(--stoneLight) 0%, var(--stone) 100%);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 4px 14px #00000080; transition:box-shadow .25s ease;
+  }
+  .door .knob { width:8px; height:8px; border-radius:50%; position:absolute; top:60px; right:14px; background:var(--gold); }
+  .door .glyph { font-size:44px; font-family:'Cinzel',serif; }
+  .entryInfo { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .entryCount { font-size:13px; letter-spacing:.5px; }
+  .entryTimer { font-size:12px; color:var(--parchmentDim); opacity:.8; }
+
+  /* Backpack */
+  .backpackPanel { background:var(--stone); min-height:520px; padding:28px; border-radius:0 8px 8px 8px; }
+  .allyGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; }
+  .allyCard { background:var(--stoneLight); border:1px solid #c9932e44; border-radius:8px; padding:14px; }
+  .allyCardTop { display:flex; justify-content:space-between; align-items:center; }
+  .allyStats { color:var(--parchmentDim); font-size:14px; margin-top:4px; }
+  .upgradeBtn { margin-top:10px; width:100%; padding:6px 0; font-size:14px; border:1px solid #c9932e88; border-radius:5px; cursor:pointer; }
+  .releaseBtn { margin-top:6px; width:100%; padding:6px 0; font-size:13px; background:transparent; color:var(--bloodBright); border:1px solid var(--blood); border-radius:5px; cursor:pointer; }
+
+  /* Battle */
+  .battlePanel { background:var(--mossDark); min-height:520px; padding:24px; display:flex; gap:22px; flex-wrap:wrap; border-radius:0 8px 8px 8px; }
+  .grid {
+    display:grid; grid-template-columns:repeat(10, 40px); grid-template-rows:repeat(10, 44px);
+    border:2px solid #c9932e77;
+    background:linear-gradient(135deg, #2c4327 25%, #24371f 25%, #24371f 50%, #2c4327 50%, #2c4327 75%, #24371f 75%, #24371f 100%);
+    background-size:16px 16px;
+  }
+  .cell {
+    width:40px; height:44px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; position:relative; gap:1px;
+  }
+  .cell .unitIcon { font-size:16px; line-height:1; }
+  .cell .hpText { font-size:7px; line-height:1; color:#fff; text-shadow:0 0 2px #000, 0 0 2px #000; }
+  .cell .hpbar { position:absolute; bottom:1px; left:3px; right:3px; height:3px; background:#000000aa; }
+  .cell .hpfill { height:100%; }
+  .teamCard { cursor:pointer; padding:12px; background:var(--stone); border:1px solid var(--stoneLight); border-radius:8px; }
+  .teamCard.chosen { background:#c9932e22; border-color:var(--gold); }
+  .botCard { cursor:pointer; padding:12px; background:var(--stone); border:1px solid var(--stoneLight); border-radius:8px; position:relative; overflow:hidden; }
+  .botCard.chosen { background:#c9932e22; border-color:var(--gold); }
+  .botCard.locked { cursor:not-allowed; opacity:.75; }
+  .chainBar { position:absolute; top:38%; left:50%; width:150%; height:7px; background:repeating-linear-gradient(90deg,#9a9a9a 0 8px,#5c5c5c 8px 12px); box-shadow:0 0 4px #000; opacity:.42; z-index:1; }
+  .botCard.locked .cinzel, .botCard.locked .lockedDesc { position:relative; z-index:2; text-shadow:0 1px 3px #000, 0 0 6px #000; }
+  .logPanel { min-width:220px; color:var(--parchmentDim); }
+  .logPanel p { font-size:13px; margin:4px 0; }
+</style>
+</head>
+<body>
+<div class="skyBanner">
+  <div class="sun"></div>
+  <div class="cloud" style="width:70px;height:22px;top:30px;left:10%;"></div>
+  <div class="cloud" style="width:50px;height:16px;top:55px;left:60%;"></div>
+  <svg viewBox="0 0 400 90" preserveAspectRatio="none">
+    <rect x="0" y="40" width="400" height="50" fill="#241a2e"/>
+    <rect x="20" y="18" width="26" height="55" fill="#2f2338"/>
+    <rect x="14" y="10" width="6" height="10" fill="#2f2338"/>
+    <rect x="26" y="10" width="6" height="10" fill="#2f2338"/>
+    <rect x="38" y="10" width="6" height="10" fill="#2f2338"/>
+    <rect x="70" y="30" width="60" height="43" fill="#2f2338"/>
+    <rect x="70" y="20" width="8" height="10" fill="#2f2338"/>
+    <rect x="84" y="20" width="8" height="10" fill="#2f2338"/>
+    <rect x="98" y="20" width="8" height="10" fill="#2f2338"/>
+    <rect x="112" y="20" width="8" height="10" fill="#2f2338"/>
+    <circle cx="100" cy="46" r="7" fill="#5b3d78"/>
+    <rect x="150" y="8" width="22" height="65" fill="#2f2338"/>
+    <polygon points="150,8 161,-10 172,8" fill="#3a2b45"/>
+    <rect x="190" y="34" width="90" height="39" fill="#2f2338"/>
+    <rect x="190" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="207" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="224" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="241" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="258" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="270" y="24" width="9" height="10" fill="#2f2338"/>
+    <rect x="310" y="16" width="24" height="57" fill="#2f2338"/>
+    <rect x="304" y="8" width="6" height="10" fill="#2f2338"/>
+    <rect x="316" y="8" width="6" height="10" fill="#2f2338"/>
+    <rect x="328" y="8" width="6" height="10" fill="#2f2338"/>
+    <rect x="355" y="28" width="35" height="45" fill="#2f2338"/>
+    <rect x="355" y="18" width="6" height="10" fill="#2f2338"/>
+    <rect x="368" y="18" width="6" height="10" fill="#2f2338"/>
+    <rect x="381" y="18" width="6" height="10" fill="#2f2338"/>
+  </svg>
+</div>
+<div id="app"></div>
+
+<script>
+/* =========================================================================
+   GAME DATA / MATH
+   ========================================================================= */
+const TYPE_ORDER = ['earth','fire','water','electricity','wind'];
+const TYPE_ICONS = { earth:'&#127793;', fire:'&#128293;', water:'&#128167;', electricity:'&#9889;', wind:'&#127788;&#65039;' };
+const TYPE_LABEL = { earth:'Earth', fire:'Fire', water:'Water', electricity:'Electricity', wind:'Wind' };
+
+const ALLY_ROSTER = [
+  { name:'Bramblewick', type:'earth' }, { name:'Thornfield', type:'earth' }, { name:'Grovemantle', type:'earth' },
+  { name:'Emberlyn', type:'fire' }, { name:'Ashford', type:'fire' }, { name:'Cinderholt', type:'fire' },
+  { name:'Marlowe', type:'water' }, { name:'Tidewell', type:'water' }, { name:'Brinnock', type:'water' },
+  { name:'Stormrick', type:'electricity' }, { name:'Voltwick', type:'electricity' }, { name:'Fulmen', type:'electricity' },
+  { name:'Windrift', type:'wind' }, { name:'Gale', type:'wind' }, { name:'Zephyrin', type:'wind' },
+];
+
+const BOT_DEFS = {
+  guard:  { key:'guard',  name:'Guard',  diff:'Easy',      types:['earth','earth'],             levelDelta:-2, reward:50 },
+  jester: { key:'jester', name:'Jester', diff:'Medium',    types:['wind','wind'],                levelDelta:0,  reward:75 },
+  prince: { key:'prince', name:'Prince', diff:'Hard',      types:['fire','fire'],                levelDelta:2,  reward:100 },
+  king:   { key:'king',   name:'King',   diff:'Legendary', types:['fire','water'],               levelDelta:5,  reward:150 },
+};
+const BOT_ORDER = ['guard','jester','prince','king'];
+
+const SIZE = 10;
+
+function statsForLevel(level){ return { hp: 20 + 10*(level-1), dmg: 5 + 5*(level-1) }; }
+function upgradeCost(level){ return 15 + 5*(level-1); }
+function storageCostFn(upgradesDone){ return 150 + 50*upgradesDone; }
+function tierForLevel(level){
+  if(level>=15) return 15;
+  if(level>=10) return 10;
+  if(level>=5) return 5;
+  return 1;
+}
+function kingOffsets(){
+  const o=[];
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++) if(!(dr===0&&dc===0)) o.push([dr,dc]);
+  return o;
+}
+function movePatternForTier(tier){
+  const king = kingOffsets();
+  if(tier===1) return king;
+  const diamond = [...king,[-2,0],[2,0],[0,-2],[0,2]];
+  if(tier===5) return diamond;
+  const block=[];
+  for(let dr=-2;dr<=2;dr++) for(let dc=-2;dc<=2;dc++) if(!(dr===0&&dc===0)) block.push([dr,dc]);
+  if(tier===10) return block;
+  const tri = [
+    [-3,-1],[-3,0],[-3,1],[-4,0],
+    [3,-1],[3,0],[3,1],[4,0],
+    [-1,-3],[0,-3],[1,-3],[0,-4],
+    [-1,3],[0,3],[1,3],[0,4],
+  ];
+  return [...block, ...tri];
+}
+function movePatternForLevel(level){ return movePatternForTier(tierForLevel(level)); }
+function attackPatternForLevel(level){
+  const tier = tierForLevel(level);
+  if(tier===1) return movePatternForTier(1);
+  if(tier===5) return movePatternForTier(1);
+  if(tier===10) return movePatternForTier(5);
+  return movePatternForTier(10);
+}
+function typeMultiplier(attackerType, defenderType){
+  if(!attackerType || !defenderType) return 1;
+  const ai = TYPE_ORDER.indexOf(attackerType);
+  const di = TYPE_ORDER.indexOf(defenderType);
+  if(ai<0 || di<0) return 1;
+  const d = ((di-ai)%5+5)%5;
+  if(d===1) return 2;
+  if(d===2) return 1.5;
+  if(d===4) return 0.5;
+  return 1; // d===0 or d===3
+}
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+let _id = 0;
+function nextId(){ _id+=1; return 'u'+_id+'-'+Date.now(); }
+function inBounds(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
+function legalSquares(unit, offsets){
+  const out=[];
+  offsets.forEach(([dr,dc])=>{
+    const r=unit.r+dr, c=unit.c+dc;
+    if(inBounds(r,c)) out.push([r,c]);
+  });
+  return out;
+}
+function clampLevel(n){ return Math.max(1, Math.min(15, n)); }
+
+/* =========================================================================
+   GLOBAL STATE
+   ========================================================================= */
+const state = {
+  tab: 'doors',
+  money: 20,
+  bankedAllies: [],
+  storageUpgrades: 0,
+
+  // door room
+  inRun: false,
+  runMoney: 0,
+  runAllies: [],
+  doors: null,
+  revealedIdx: null,
+  message: "Step through the gate to begin your descent.",
+  busy: false,
+  entriesLeft: 5,
+  secondsLeft: 60,
+
+  // battle
+  teamIds: [],
+  selectedBotKey: null,
+  phase: 'select', // select | active | won | lost
+  units: [],
+  turn: 'player',
+  selected: null,
+  log: [],
+  defeated: { guard:false, jester:false, prince:false },
+  lastAllyName: null,
+};
+
+function storageCap(){ return 6 + state.storageUpgrades*5; }
+function kingUnlocked(){ return state.defeated.guard && state.defeated.jester && state.defeated.prince; }
+
+/* =========================================================================
+   TIMERS
+   ========================================================================= */
+setInterval(()=>{
+  state.entriesLeft = 5;
+  state.secondsLeft = 60;
+  if(state.tab==='doors') render();
+}, 60000);
+setInterval(()=>{
+  state.secondsLeft = state.secondsLeft<=1 ? 60 : state.secondsLeft-1;
+  if(state.tab==='doors') render();
+}, 1000);
+
+/* =========================================================================
+   DOOR ROOM LOGIC
+   ========================================================================= */
+function freshDoors(){ return shuffle(['money','ally','bust']).map(type=>({type})); }
+
+function startRun(){
+  if(state.entriesLeft<=0) return;
+  state.entriesLeft -= 1;
+  state.inRun = true;
+  state.runMoney = 0;
+  state.runAllies = [];
+  state.doors = freshDoors();
+  state.revealedIdx = null;
+  state.message = "Three doors. Choose wisely.";
+  render();
+}
+
+function pickDoor(i){
+  if(state.busy || state.revealedIdx!==null) return;
+  state.busy = true;
+  state.revealedIdx = i;
+  const type = state.doors[i].type;
+  render();
+
+  setTimeout(()=>{
+    if(type==='bust'){
+      state.message = "The door was hollow. You lose everything from this descent.";
+      state.inRun = false; state.doors = null; state.runMoney = 0; state.runAllies = [];
+    } else if(type==='money'){
+      state.runMoney += 25;
+      state.message = "Coin glints in the dark. +25 gold banked for this run.";
+      state.doors = freshDoors(); state.revealedIdx = null;
+    } else {
+      const pool = ALLY_ROSTER.filter(a=>a.name!==state.lastAllyName);
+      const pick = pool[Math.floor(Math.random()*pool.length)];
+      state.lastAllyName = pick.name;
+      state.runAllies.push(pick);
+      state.message = TYPE_ICONS[pick.type]+' '+pick.name+' ('+TYPE_LABEL[pick.type]+') steps out of the shadows and joins your run.';
+      state.doors = freshDoors(); state.revealedIdx = null;
+    }
+    state.busy = false;
+    render();
+  }, 550);
+}
+
+function cashOut(){
+  state.money += state.runMoney;
+  let overflow = 0;
+  state.runAllies.forEach(pick=>{
+    if(state.bankedAllies.length < storageCap()){
+      state.bankedAllies.push({ id: nextId(), name: pick.name, type: pick.type, level: 1 });
+    } else overflow += 25;
+  });
+  state.money += overflow;
+  state.message = overflow>0
+    ? "You cashed out. Some allies had no room in the backpack and were paid out as gold instead."
+    : "You cashed out safely with everything you found.";
+  state.inRun = false; state.doors = null; state.runMoney = 0; state.runAllies = []; state.revealedIdx = null;
+  render();
+}
+
+/* =========================================================================
+   BACKPACK LOGIC
+   ========================================================================= */
+function upgradeAlly(id){
+  const a = state.bankedAllies.find(x=>x.id===id);
+  if(!a || a.level>=15) return;
+  const cost = upgradeCost(a.level);
+  if(state.money < cost) return;
+  state.money -= cost;
+  a.level += 1;
+  render();
+}
+function releaseAlly(id){
+  state.bankedAllies = state.bankedAllies.filter(a=>a.id!==id);
+  state.teamIds = state.teamIds.filter(x=>x!==id);
+  render();
+}
+function upgradeStorage(){
+  const cost = storageCostFn(state.storageUpgrades);
+  if(state.money < cost) return;
+  state.money -= cost;
+  state.storageUpgrades += 1;
+  render();
+}
+
+/* =========================================================================
+   BATTLE LOGIC
+   ========================================================================= */
+function toggleTeam(id){
+  if(state.teamIds.includes(id)) state.teamIds = state.teamIds.filter(x=>x!==id);
+  else if(state.teamIds.length<2) state.teamIds.push(id);
+  render();
+}
+function chooseBot(key){
+  if(key==='king' && !kingUnlocked()) return;
+  state.selectedBotKey = key;
+  render();
+}
+function pushLog(line){ state.log = [line, ...state.log].slice(0,8); }
+
+function startBattle(){
+  const team = state.bankedAllies.filter(a=>state.teamIds.includes(a.id));
+  if(team.length===0 || !state.selectedBotKey) return;
+  const def = BOT_DEFS[state.selectedBotKey];
+  const playerUnits = team.map((a,i)=>{
+    const s = statsForLevel(a.level);
+    return { id:a.id, side:'player', name:a.name, type:a.type, level:a.level, hp:s.hp, maxHp:s.hp, dmg:s.dmg, r:9, c:3+i };
+  });
+  const avgLevel = Math.max(1, Math.round(team.reduce((sum,a)=>sum+a.level,0)/team.length));
+  const botLevel = clampLevel(avgLevel + def.levelDelta);
+  const botUnits = def.types.map((type,i)=>{
+    const s = statsForLevel(botLevel);
+    return { id:'bot-'+i, side:'bot', name:def.name+' '+(i===0?'I':'II'), type, level:botLevel, hp:s.hp, maxHp:s.hp, dmg:s.dmg, r:0, c:3+i };
+  });
+  state.units = [...playerUnits, ...botUnits];
+  state.phase = 'active';
+  state.turn = 'player';
+  state.selected = null;
+  state.log = ['The '+def.name+' emerges. Battle begins.'];
+  render();
+}
+
+function aliveUnits(){ return state.units.filter(u=>u.hp>0); }
+function occupant(r,c){ return aliveUnits().find(u=>u.r===r && u.c===c) || null; }
+
+function endCheck(){
+  const pAlive = state.units.some(u=>u.side==='player' && u.hp>0);
+  const bAlive = state.units.some(u=>u.side==='bot' && u.hp>0);
+  if(!bAlive){
+    const def = BOT_DEFS[state.selectedBotKey];
+    state.money += def.reward;
+    state.phase='won';
+    if(state.selectedBotKey!=='king') state.defeated[state.selectedBotKey] = true;
+    pushLog('The last of the '+def.name+"'s falls. Victory! +"+def.reward+' gold.');
+    return true;
+  }
+  if(!pAlive){ state.phase='lost'; pushLog("Your allies have fallen. Retreat."); return true; }
+  return false;
+}
+
+function dmgWithType(attacker, target){
+  const mult = typeMultiplier(attacker.type, target.type);
+  const dmg = Math.round(attacker.dmg * mult);
+  const tag = mult===1 ? '' : ' (x'+mult+')';
+  return { dmg, tag };
+}
+
+function doMove(unit, r, c){
+  unit.r = r; unit.c = c;
+  pushLog(unit.name+" moves.");
+  afterAction();
+}
+function doAttack(attacker, target){
+  const { dmg, tag } = dmgWithType(attacker, target);
+  target.hp = Math.max(0, target.hp - dmg);
+  pushLog(attacker.name+" strikes "+target.name+" for "+dmg+tag+".");
+  if(!endCheck()) afterAction();
+  else { state.selected=null; render(); }
+}
+function afterAction(){
+  state.selected = null;
+  if(endCheck()){ render(); return; }
+  state.turn = 'bot';
+  render();
+  setTimeout(botTurn, 650);
+}
+function botTurn(){
+  const bots = state.units.filter(u=>u.side==='bot' && u.hp>0);
+  const players = state.units.filter(u=>u.side==='player' && u.hp>0);
+  if(bots.length===0 || players.length===0){ render(); return; }
+
+  for(const bot of bots){
+    const atkSq = legalSquares(bot, attackPatternForLevel(bot.level));
+    const candidates = players
+      .map(p=>({p, hit: atkSq.some(([r,c])=>r===p.r && c===p.c)}))
+      .filter(x=>x.hit)
+      .sort((a,b)=>a.p.hp-b.p.hp);
+    if(candidates.length>0){
+      const target = candidates[0].p;
+      const { dmg, tag } = dmgWithType(bot, target);
+      target.hp = Math.max(0, target.hp - dmg);
+      pushLog(bot.name+" strikes "+target.name+" for "+dmg+tag+".");
+      if(endCheck()){ render(); return; }
+      state.turn = 'player';
+      render();
+      return;
+    }
+  }
+  const mover = bots[0];
+  const legal = legalSquares(mover, movePatternForLevel(mover.level))
+    .filter(([r,c])=> !state.units.some(u=>u.hp>0 && u.r===r && u.c===c));
+  if(legal.length>0){
+    const nearest = players.reduce((best,p)=>
+      (Math.abs(p.r-mover.r)+Math.abs(p.c-mover.c)) < (Math.abs(best.r-mover.r)+Math.abs(best.c-mover.c)) ? p : best
+    );
+    legal.sort((a,b)=>
+      Math.max(Math.abs(a[0]-nearest.r), Math.abs(a[1]-nearest.c)) -
+      Math.max(Math.abs(b[0]-nearest.r), Math.abs(b[1]-nearest.c))
+    );
+    mover.r = legal[0][0]; mover.c = legal[0][1];
+    pushLog(mover.name+" advances.");
+  } else {
+    pushLog(mover.name+" has no move.");
+  }
+  state.turn = 'player';
+  render();
+}
+
+function cellClick(r,c){
+  if(state.phase!=='active' || state.turn!=='player') return;
+  const selUnit = aliveUnits().find(u=>u.id===state.selected) || null;
+  const occ = occupant(r,c);
+  if(!selUnit){
+    if(occ && occ.side==='player'){ state.selected = occ.id; render(); }
+    return;
+  }
+  const atkSquares = legalSquares(selUnit, attackPatternForLevel(selUnit.level));
+  const moveSquares = legalSquares(selUnit, movePatternForLevel(selUnit.level));
+  if(occ && occ.side==='bot' && atkSquares.some(([ar,ac])=>ar===r&&ac===c)){ doAttack(selUnit, occ); return; }
+  if(!occ && moveSquares.some(([mr,mc])=>mr===r&&mc===c)){ doMove(selUnit, r, c); return; }
+  if(occ && occ.side==='player'){ state.selected = occ.id; render(); }
+}
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderDoors(){
+  let doorsHtml = '';
+  if(state.inRun && state.doors){
+    const doorTiles = state.doors.map((d,i)=>{
+      const revealed = state.revealedIdx===i;
+      const label = !revealed ? '?' : d.type==='money' ? '&#129689;' : d.type==='ally' ? '&#9822;' : '&#9760;';
+      const glow = revealed && d.type==='money' ? 'var(--goldBright)'
+        : revealed && d.type==='ally' ? '#7fb37a'
+        : revealed && d.type==='bust' ? 'var(--bloodBright)' : 'var(--parchmentDim)';
+      const shadow = revealed ? '0 0 22px '+glow+'66' : '0 4px 14px #00000080';
+      return '<div class="door" data-action="pickDoor" data-idx="'+i+'" style="box-shadow:'+shadow+'">'
+        + '<div class="knob"></div>'
+        + '<span class="glyph" style="color:'+glow+'">'+label+'</span>'
+        + '</div>';
+    }).join('');
+    doorsHtml = '<div class="doorRow">'+doorTiles+'</div>'
+      + '<button class="btn-secondary" data-action="cashOut" '+(state.busy?'disabled':'')+'>'
+      + 'Cash Out &amp; Leave ('+state.runMoney+' gold'+(state.runAllies.length? ', '+state.runAllies.length+' allies':'')+')</button>';
+  } else {
+    doorsHtml = '<div class="entryInfo">'
+      + '<span class="entryCount" style="color:'+(state.entriesLeft>0?'var(--parchmentDim)':'var(--bloodBright)')+'">'
+      + 'Descents remaining this minute: '+state.entriesLeft+' / 5</span>'
+      + '<span class="entryTimer">Resets in '+state.secondsLeft+'s</span>'
+      + '<button class="btn-primary" data-action="startRun" '+(state.entriesLeft<=0?'disabled':'')+' style="margin-top:6px;">'
+      + (state.entriesLeft<=0 ? 'Gate Sealed — Wait for Reset' : 'Enter the Hall')
+      + '</button></div>';
+  }
+
+  let heldHtml = '';
+  if(state.inRun){
+    const alliesDisplay = state.runAllies.length
+      ? state.runAllies.map(a=>TYPE_ICONS[a.type]+' '+esc(a.name)).join(', ')
+      : 'none yet';
+    heldHtml = '<div style="display:flex;gap:20px;font-size:15px;">'
+      + '<span>Held this run: <span class="coin">'+state.runMoney+' &#129689;</span></span>'
+      + '<span>Allies found: <b style="color:#7fb37a">'+alliesDisplay+'</b></span>'
+      + '</div>';
+  }
+
+  return '<div class="doorsPanel">'
+    + '<div style="text-align:center;">'
+    + '<h2 style="color:var(--goldBright);font-size:22px;letter-spacing:2px;margin:0;">THE CHANCE HALL</h2>'
+    + '<p style="color:var(--parchmentDim);font-style:italic;margin-top:6px;font-size:15px;">'+esc(state.message)+'</p>'
+    + '</div>'
+    + heldHtml
+    + doorsHtml
+    + '</div>';
+}
+
+function renderTypeWheel(){
+  const pts = {
+    earth: {x:150,y:55}, fire:{x:240,y:121}, water:{x:206,y:227}, electricity:{x:94,y:227}, wind:{x:60,y:121}
+  };
+  const colors = { earth:'#4a7a3d', fire:'#c24545', water:'#3d6fa8', electricity:'#e8c53d', wind:'#7fc2c9' };
+  const arcs = [
+    { from:'earth', to:'fire', sx:172.6, sy:71.5, cx:209.7, cy:67.8, ex:211.0, ey:99.7 },
+    { from:'fire', to:'water', sx:231.5, sy:147.7, cx:246.8, cy:181.8, ex:217.0, ey:192.7 },
+    { from:'water', to:'electricity', sx:178, sy:227, cx:150, cy:252, ex:130, ey:227 },
+    { from:'electricity', to:'wind', sx:85.5, sy:200.3, cx:53.2, cy:181.8, ex:71.0, ey:155.3 },
+    { from:'wind', to:'earth', sx:82.6, sy:104.5, cx:90.3, cy:67.8, ex:121.0, ey:76.3 },
+  ];
+  const paths = arcs.map(a=>
+    '<path d="M '+a.sx+' '+a.sy+' Q '+a.cx+' '+a.cy+' '+a.ex+' '+a.ey+'" stroke="#c9932e" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />'
+  ).join('');
+  const circles = TYPE_ORDER.map(t=>{
+    const p = pts[t];
+    return '<circle cx="'+p.x+'" cy="'+p.y+'" r="26" fill="'+colors[t]+'" fill-opacity="0.85" stroke="#e8dfc8" stroke-width="2" />'
+      + '<text x="'+p.x+'" y="'+(p.y+8)+'" font-size="22" text-anchor="middle">'+TYPE_ICONS[t]+'</text>';
+  }).join('');
+  return '<svg viewBox="0 0 300 300" width="260" height="260" style="display:block;margin:0 auto;">'
+    + '<defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">'
+    + '<polygon points="0 0, 8 4, 0 8" fill="#c9932e" /></marker></defs>'
+    + paths + circles
+    + '</svg>';
+}
+
+function renderBackpack(){
+  const cap = storageCap();
+  let cards = state.bankedAllies.map(a=>{
+    const s = statsForLevel(a.level);
+    const cost = upgradeCost(a.level);
+    const maxed = a.level>=15;
+    const disabled = maxed || state.money<cost;
+    return '<div class="allyCard">'
+      + '<div class="allyCardTop"><span class="cinzel" style="font-weight:700;">'+TYPE_ICONS[a.type]+' '+esc(a.name)+'</span>'
+      + '<span style="color:var(--goldBright);">Lv '+a.level+'</span></div>'
+      + '<div class="allyStats">'+TYPE_LABEL[a.type]+' &middot; HP '+s.hp+'/'+s.hp+' &middot; DMG '+s.dmg+' &middot; tier '+tierForLevel(a.level)+'</div>'
+      + '<button class="upgradeBtn" data-action="upgradeAlly" data-id="'+a.id+'" '+(disabled?'disabled':'')+' style="background:'+(maxed?'transparent':state.money<cost?'#33302a':'var(--gold)')+';color:'+(maxed||state.money<cost?'var(--parchmentDim)':'var(--ink)')+';cursor:'+(disabled?'default':'pointer')+';">'
+      + (maxed?'Max Level':'Upgrade — '+cost+' gold')+'</button>'
+      + '<button class="releaseBtn" data-action="releaseAlly" data-id="'+a.id+'">Release (no refund)</button>'
+      + '</div>';
+  }).join('');
+  if(state.bankedAllies.length===0){
+    cards = '<p style="color:var(--parchmentDim);font-style:italic;">Empty. Visit the Chance Hall to find allies.</p>';
+  }
+  const storageCostVal = storageCostFn(state.storageUpgrades);
+  const summary = 'Descend into the <b style="color:var(--goldBright);">Chance Hall</b> to gamble for gold and allies behind three doors each round — cash out anytime, or risk it all on the next door and lose everything to a bust. '
+    + 'Bank your allies here in the <b style="color:var(--goldBright);">Backpack</b>, spend gold to level them up (to a max of 15) or release ones you no longer want, and expand your storage when you run out of room. '
+    + 'Then take a team of up to 2 allies into the <b style="color:var(--goldBright);">Arena</b> to battle the Guard, Jester, Prince, or the hidden King, using each ally&#39;s level-based movement range to close in and attack for gold rewards.';
+  const wheelCaption = 'Each type is 2x strong against the next one clockwise, 1.5x against the one after that, normal at 3 steps, and 0.5x (weak) against the one that beats it.';
+  return '<div class="backpackPanel">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;">'
+    + '<h2 style="color:var(--goldBright);font-size:20px;letter-spacing:2px;margin:0;">BACKPACK</h2>'
+    + '<span style="color:var(--parchmentDim);">'+state.bankedAllies.length+' / '+cap+' slots &middot; <span class="coin">'+state.money+' &#129689;</span> &middot; <a href="#yourAllies" style="color:var(--goldBright);">Jump to allies &#8595;</a></span>'
+    + '</div>'
+    + '<div style="background:var(--stoneLight);border:1px solid #c9932e33;border-radius:8px;padding:14px 18px;margin-bottom:22px;color:var(--parchmentDim);font-size:14px;line-height:1.5;">'+summary+'</div>'
+    + '<div style="background:var(--stoneLight);border:1px solid #c9932e33;border-radius:8px;padding:18px;margin-bottom:22px;">'
+    + '<h3 style="color:var(--goldBright);font-size:14px;text-align:center;margin:0 0 10px;">TYPE ADVANTAGE WHEEL</h3>'
+    + renderTypeWheel()
+    + '<p style="color:var(--parchmentDim);font-size:12px;text-align:center;margin-top:8px;">'+wheelCaption+'</p>'
+    + '</div>'
+    + '<h3 style="color:var(--goldBright);font-size:16px;letter-spacing:1.5px;margin:0 0 12px;border-bottom:1px solid #c9932e55;padding-bottom:8px;">&#127959;&#65039; YOUR ALLIES</h3>'
+    + '<div id="yourAllies" style="background:var(--stoneLight);border:2px solid var(--gold);border-radius:8px;padding:18px;">'
+    + '<div class="allyGrid">'+cards+'</div>'
+    + '</div>'
+    + '<div style="margin-top:26px;border-top:1px solid #c9932e33;padding-top:18px;">'
+    + '<button class="btn-secondary" data-action="upgradeStorage" '+(state.money<storageCostVal?'disabled':'')+'>Expand Storage +5 — '+storageCostVal+' gold</button>'
+    + '</div></div>';
+}
+
+function renderBotCard(key){
+  const def = BOT_DEFS[key];
+  const locked = key==='king' && !kingUnlocked();
+  const chosen = state.selectedBotKey===key;
+  if(locked){
+    return '<div class="botCard locked">'
+      + '<div class="chainBar" style="transform:translate(-50%,-50%) rotate(20deg);"></div>'
+      + '<div class="chainBar" style="transform:translate(-50%,-50%) rotate(-20deg);"></div>'
+      + '<b class="cinzel">&#128081; '+def.name+'</b> — '+def.diff
+      + '<div class="lockedDesc" style="color:var(--parchmentDim);font-size:12px;margin-top:6px;">Defeat the Guard, Jester, and Prince to challenge the King.</div>'
+      + '</div>';
+  }
+  return '<div class="botCard '+(chosen?'chosen':'')+'" data-action="chooseBot" data-key="'+key+'">'
+    + '<b class="cinzel">'+(key==='king'?'&#128081; ':'')+def.name+'</b> — '+def.diff
+    + '<div style="color:var(--parchmentDim);font-size:12px;margin-top:6px;">Types: '+def.types.map(t=>TYPE_ICONS[t]+' '+TYPE_LABEL[t]).join(' &amp; ')+'</div>'
+    + '<div style="color:var(--parchmentDim);font-size:12px;">Reward: '+def.reward+' gold</div>'
+    + '</div>';
+}
+
+function renderBattle(){
+  if(state.phase==='select'){
+    let cards = state.bankedAllies.map(a=>{
+      const chosen = state.teamIds.includes(a.id);
+      const s = statsForLevel(a.level);
+      return '<div class="teamCard '+(chosen?'chosen':'')+'" data-action="toggleTeam" data-id="'+a.id+'">'
+        + '<b class="cinzel">'+TYPE_ICONS[a.type]+' '+esc(a.name)+'</b> — Lv '+a.level
+        + '<div style="color:var(--parchmentDim);font-size:13px;">'+TYPE_LABEL[a.type]+' &middot; HP '+s.hp+'/'+s.hp+' &middot; DMG '+s.dmg+'</div></div>';
+    }).join('');
+    if(state.bankedAllies.length===0){
+      cards = '<p style="color:var(--parchmentDim);">No allies yet — visit the Chance Hall first.</p>';
+    }
+    const botCards = BOT_ORDER.map(renderBotCard).join('');
+    const canStart = state.teamIds.length>0 && state.selectedBotKey && !(state.selectedBotKey==='king' && !kingUnlocked());
+    return '<div class="battlePanel" style="display:block;">'
+      + '<h2 style="color:var(--goldBright);font-size:20px;letter-spacing:2px;">THE ARENA</h2>'
+      + '<p style="color:var(--parchmentDim);font-style:italic;">Pick up to 2 allies, then choose your opponent. Bots scale to match your team&#39;s average level.</p>'
+      + '<h3 style="color:var(--goldBright);font-size:14px;margin-top:18px;">YOUR TEAM</h3>'
+      + '<div class="allyGrid">'+cards+'</div>'
+      + '<h3 style="color:var(--goldBright);font-size:14px;margin-top:18px;">CHOOSE YOUR OPPONENT</h3>'
+      + '<div class="allyGrid">'+botCards+'</div>'
+      + '<button class="btn-primary" data-action="startBattle" '+(canStart?'':'disabled')+' style="margin-top:20px;">Enter Battle</button>'
+      + '</div>';
+  }
+
+  let cells = '';
+  const alive = aliveUnits();
+  const selUnit = alive.find(u=>u.id===state.selected) || null;
+  const moveSquares = selUnit ? legalSquares(selUnit, movePatternForLevel(selUnit.level)) : [];
+  const atkSquares = selUnit ? legalSquares(selUnit, attackPatternForLevel(selUnit.level)) : [];
+
+  for(let r=0;r<SIZE;r++){
+    for(let c=0;c<SIZE;c++){
+      const occ = occupant(r,c);
+      const isMove = selUnit && moveSquares.some(([mr,mc])=>mr===r&&mc===c) && !occ;
+      const isAtk = selUnit && atkSquares.some(([ar,ac])=>ar===r&&ac===c) && occ && occ.side==='bot';
+      const isSel = selUnit && selUnit.r===r && selUnit.c===c;
+      let bg = 'transparent';
+      if(isSel) bg = '#c9932e55'; else if(isMove) bg='#4a90d955'; else if(isAtk) bg='#8a2f2f88';
+      const outline = isSel ? '2px solid var(--gold)' : 'none';
+      const sideBorder = occ ? ('3px solid '+(occ.side==='player'?'#7fb37a':'var(--bloodBright)')) : 'none';
+      let inner = '';
+      let tooltip = '';
+      if(occ){
+        const pct = Math.round((occ.hp/occ.maxHp)*100);
+        inner = '<span class="unitIcon">'+TYPE_ICONS[occ.type]+'</span>'
+          + '<span class="hpText">'+occ.hp+'/'+occ.maxHp+'</span>'
+          + '<div class="hpbar"><div class="hpfill" style="width:'+pct+'%;background:'+(occ.side==='player'?'#7fb37a':'var(--bloodBright)')+';"></div></div>';
+        tooltip = occ.name+' | Type: '+TYPE_LABEL[occ.type]+' | HP: '+occ.hp+'/'+occ.maxHp+' | DMG: '+occ.dmg;
+      }
+      cells += '<div class="cell" data-action="cellClick" data-r="'+r+'" data-c="'+c+'" '
+        + 'style="background:'+bg+';outline:'+outline+';border-bottom:'+sideBorder+';" title="'+esc(tooltip)+'">'
+        + inner + '</div>';
+    }
+  }
+
+  let statusHtml = '';
+  if(state.phase==='active'){
+    statusHtml = '<p style="margin-top:10px;">'+(state.turn==='player'
+      ? 'Your turn — select an ally, then click a blue tile to move or a red tile to attack.'
+      : 'Bot is thinking...')+'</p>';
+  } else {
+    const won = state.phase==='won';
+    statusHtml = '<div style="margin-top:12px;">'
+      + '<p class="cinzel" style="color:'+(won?'#7fb37a':'var(--bloodBright)')+';font-size:16px;">'+(won?'VICTORY':'DEFEAT')+'</p>'
+      + '<button class="btn-secondary" data-action="returnSelect">Return to Team Select</button></div>';
+  }
+
+  const logHtml = state.log.map(l=>'<p>'+esc(l)+'</p>').join('');
+
+  return '<div class="battlePanel">'
+    + '<div><div class="grid">'+cells+'</div>'+statusHtml+'</div>'
+    + '<div class="logPanel"><h3 style="color:var(--goldBright);font-size:15px;">BATTLE LOG</h3>'+logHtml+'</div>'
+    + '</div>';
+}
+
+function render(){
+  const money = state.money;
+  let body = '';
+  if(state.tab==='doors') body = renderDoors();
+  else if(state.tab==='battle') body = renderBattle();
+  else body = renderBackpack();
+
+  document.getElementById('app').innerHTML =
+    '<div class="wrap">'
+    + '<div class="headerRow">'
+    + '<h1 class="title">PICKADOOR</h1>'
+    + '<span class="coin">'+money+' &#129689;</span>'
+    + '</div>'
+    + '<div class="tabs">'
+    + '<button class="tab-btn '+(state.tab==='doors'?'active':'')+'" data-action="setTab" data-tab="doors">Chance Hall</button>'
+    + '<button class="tab-btn '+(state.tab==='battle'?'active':'')+'" data-action="setTab" data-tab="battle">Arena</button>'
+    + '<button class="tab-btn '+(state.tab==='backpack'?'active':'')+'" data-action="setTab" data-tab="backpack">Backpack</button>'
+    + '</div>'
+    + body
+    + '</div>';
+}
+
+/* =========================================================================
+   EVENT DELEGATION
+   ========================================================================= */
+document.getElementById('app').addEventListener('click', (e)=>{
+  const target = e.target.closest('[data-action]');
+  if(!target) return;
+  const action = target.dataset.action;
+  switch(action){
+    case 'setTab': state.tab = target.dataset.tab; render(); break;
+    case 'startRun': startRun(); break;
+    case 'pickDoor': pickDoor(parseInt(target.dataset.idx,10)); break;
+    case 'cashOut': cashOut(); break;
+    case 'upgradeAlly': upgradeAlly(target.dataset.id); break;
+    case 'releaseAlly': releaseAlly(target.dataset.id); break;
+    case 'upgradeStorage': upgradeStorage(); break;
+    case 'toggleTeam': toggleTeam(target.dataset.id); break;
+    case 'chooseBot': chooseBot(target.dataset.key); break;
+    case 'startBattle': startBattle(); break;
+    case 'cellClick': cellClick(parseInt(target.dataset.r,10), parseInt(target.dataset.c,10)); break;
+    case 'returnSelect': state.phase='select'; render(); break;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
