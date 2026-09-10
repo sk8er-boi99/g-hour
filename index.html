@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLICKER GAMES</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rubik+Glitch&display=swap');
+
+  :root{
+    --neon-blue:#00e5ff;
+    --neon-gold:#ffd500;
+    --neon-red:#ff1744;
+    --neon-pink:#ff2bd6;
+    --bg:#050507;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,229,255,0.06), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(255,43,214,0.06), transparent 40%),
+      var(--bg);
+    font-family:'Orbitron', sans-serif;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:40px 20px 80px;
+    overflow-x:hidden;
+  }
+
+  /* subtle scanline / grid texture for tech vibe */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:40px 40px;
+    z-index:0;
+  }
+
+  h1{
+    position:relative;
+    z-index:1;
+    font-size:clamp(2.5rem, 8vw, 5.5rem);
+    letter-spacing:6px;
+    text-align:center;
+    margin:20px 0 60px;
+    color:#fff;
+    text-transform:uppercase;
+  }
+
+  .flicker-c{
+    display:inline-block;
+    color:var(--neon-pink);
+    animation: flicker 3.2s infinite;
+    text-shadow:
+      0 0 3px var(--neon-pink),
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 15px var(--neon-pink);
+  }
+
+  .rest{
+    color:var(--neon-pink);
+    text-shadow:
+      0 0 3px var(--neon-pink),
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 15px var(--neon-pink);
+  }
+
+  @keyframes flicker{
+    0%, 3%, 6%, 7%  { opacity:1; }
+    4% { opacity:0; }
+    5% { opacity:0; }
+    8% { opacity:0; }
+    8.5% { opacity:0; }
+    52% { opacity:1; }
+    53% { opacity:0; }
+    54% { opacity:1; }
+    70% { opacity:1; }
+    70.5% { opacity:0.1; }
+    71% { opacity:1; }
+    91% { opacity:1; }
+    92% { opacity:0; }
+  }
+
+  .grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:28px;
+    width:100%;
+    max-width:1100px;
+  }
+
+  .row-mid{
+    grid-template-columns:repeat(3, 1fr);
+  }
+
+  .cell{
+    background:linear-gradient(160deg, #0b0b10, #08080c);
+    border:2px solid var(--neon-blue);
+    border-radius:14px;
+    min-height:140px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:1.1rem;
+    letter-spacing:2px;
+    color:#7fdfff;
+    text-transform:uppercase;
+    animation: throb-blue 2.6s ease-in-out infinite;
+    padding:15px;
+    position:relative;
+  }
+
+  @keyframes throb-blue{
+    0%, 100% {
+      box-shadow: 0 0 6px rgba(0,229,255,0.25), 0 0 14px rgba(0,229,255,0.12) inset;
+      border-color: rgba(0,229,255,0.5);
+    }
+    50% {
+      box-shadow: 0 0 18px rgba(0,229,255,0.55), 0 0 30px rgba(0,229,255,0.25) inset;
+      border-color: rgba(0,229,255,0.9);
+    }
+  }
+
+  /* MAIN GAME cell */
+  .main-game{
+    grid-column: 2;
+    min-height:260px;
+    background:linear-gradient(160deg, #100d02, #0a0800);
+    border:3px solid var(--neon-gold);
+    font-size:2rem;
+    font-weight:900;
+    color:#ffe98a;
+    letter-spacing:3px;
+    animation: throb-gold 2.2s ease-in-out infinite;
+  }
+
+  @keyframes throb-gold{
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(255,213,0,0.35), 0 0 30px rgba(255,213,0,0.15) inset;
+      border-color: rgba(255,213,0,0.6);
+      text-shadow: 0 0 8px var(--neon-gold), 0 0 20px var(--neon-gold);
+    }
+    50% {
+      box-shadow: 0 0 45px rgba(255,213,0,0.85), 0 0 70px rgba(255,213,0,0.4) inset;
+      border-color: var(--neon-gold);
+      text-shadow: 0 0 15px var(--neon-gold), 0 0 40px var(--neon-gold), 0 0 70px var(--neon-gold);
+    }
+  }
+
+  /* Coming soon cell to the right of main game */
+  .coming-soon-cell{
+    flex-direction:column;
+    gap:6px;
+    border-color:var(--neon-gold);
+    color:#fff;
+  }
+
+  .thumb{
+    font-size:2.2rem;
+    transform: rotate(0deg);
+    animation: point 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px var(--neon-gold));
+  }
+
+  @keyframes point{
+    0%, 100% { transform: translateX(0) rotate(-8deg); }
+    50% { transform: translateX(-6px) rotate(-8deg); }
+  }
+
+  .coming-soon-big{
+    font-size:1.6rem;
+    font-weight:900;
+    color:var(--neon-gold);
+    text-shadow:0 0 8px var(--neon-gold), 0 0 20px var(--neon-gold);
+    letter-spacing:2px;
+  }
+
+  .coming-soon-small{
+    font-size:0.75rem;
+    color:#ccc;
+    letter-spacing:1px;
+    text-transform:none;
+    font-family: sans-serif;
+    opacity:0.85;
+  }
+
+  /* Made by cell */
+  .made-by{
+    border-color:var(--neon-red);
+    color:var(--neon-red);
+    font-size:1.4rem;
+    font-weight:900;
+    text-shadow:0 0 8px var(--neon-red), 0 0 20px var(--neon-red), 0 0 35px var(--neon-red);
+    animation: throb-red 2.6s ease-in-out infinite;
+    line-height:1.5;
+  }
+
+  @keyframes throb-red{
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(255,23,68,0.3), 0 0 20px rgba(255,23,68,0.15) inset;
+      border-color: rgba(255,23,68,0.6);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(255,23,68,0.7), 0 0 45px rgba(255,23,68,0.3) inset;
+      border-color: var(--neon-red);
+    }
+  }
+
+  footer{
+    position:relative;
+    z-index:1;
+    margin-top:60px;
+    font-size:0.8rem;
+    color:#555;
+    letter-spacing:1px;
+  }
+
+  @media (max-width: 800px){
+    .grid{ grid-template-columns:repeat(2, 1fr); }
+    .row-mid{ grid-template-columns:repeat(1, 1fr); }
+    .main-game{ grid-column:auto; }
+  }
+</style>
+  <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+<body>
+
+  <h1><span class="flicker-c">C</span><span class="rest">LICKER GAMES</span></h1>
+
+  <div class="grid">
+    <a href="car-clicker.html" class="cell cell-link" style="text-decoration:none;">🚗 CAR CLICKER</a>
+    <a href="cricket-clicker.html" class="cell cell-link" style="text-decoration:none;">🏏 CRICKET CLICKER</a>
+    <a href="bike-clicker.html" class="cell cell-link" style="text-decoration:none;">🚲 BIKE CLICKER</a>
+    <a href="train-clicker.html" class="cell cell-link" style="text-decoration:none;">🚂 TRAIN CLICKER</a>
+  </div>
+
+  <div class="grid row-mid" style="margin-top:28px;">
+    <div class="cell made-by">MADE BY<br>THEO<br>&amp;<br>JAMES</div>
+    <a href="car-clicker.html" class="cell main-game cell-link" style="text-decoration:none;">MAIN GAME</a>
+    <div class="cell coming-soon-cell">
+      <div class="thumb">👈</div>
+      <div class="coming-soon-big">COMING SOON</div>
+      <div class="coming-soon-small">It's not a clicker game.</div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:28px;">
+    <a href="gate-rush.html" class="cell cell-link" style="text-decoration:none;">✈️ GATE RUSH</a>
+    <a href="rocket-clicker.html" class="cell cell-link" style="text-decoration:none;">🚀 ROCKET CLICKER</a>
+    <div class="cell">Coming Soon</div>
+    <div class="cell">Coming Soon</div>
+  </div>
+
+  <footer>© CLICKER GAMES — powered by neon and questionable life choices</footer>
+
+  <div id="theoModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100;">
+    <div style="background:linear-gradient(160deg,#0b0b10,#08080c); border:3px solid var(--neon-gold); border-radius:20px; padding:50px 40px; text-align:center; max-width:90%; box-shadow:0 0 40px rgba(255,213,0,0.7);">
+      <h2 style="margin:0 0 15px; color:var(--neon-gold); text-shadow:0 0 10px var(--neon-gold),0 0 25px var(--neon-gold); font-size:2rem; letter-spacing:2px;">go say to theo</h2>
+      <p style="margin:0 0 30px; font-size:2.5rem; font-weight:900; color:#fff; text-shadow:0 0 12px var(--neon-pink),0 0 30px var(--neon-pink); letter-spacing:3px;">GO JULIAN</p>
+      <button id="theoCloseBtn" style="background:#0a0a0d; border:2px solid var(--neon-gold); color:var(--neon-gold); font-family:'Orbitron',sans-serif; font-weight:700; padding:12px 28px; border-radius:10px; cursor:pointer; letter-spacing:2px; text-shadow:0 0 6px var(--neon-gold);">CLOSE</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const code = 'theo is the best';
+      let buffer = '';
+      const modal = document.getElementById('theoModal');
+      const closeBtn = document.getElementById('theoCloseBtn');
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key && e.key.length === 1){
+          buffer += e.key.toLowerCase();
+          if (buffer.length > code.length){
+            buffer = buffer.slice(buffer.length - code.length);
+          }
+          if (buffer === code){
+            buffer = '';
+            modal.style.display = 'flex';
+          }
+        }
+      });
+
+      function closeModal(){ modal.style.display = 'none'; }
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    })();
+  </script>
+
+</body>
+</html>
