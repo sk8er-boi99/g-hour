@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLICKER GAMES</title>
+<style>
+  :root{
+    --bg:#0a0a12;
+    --neon:#ff6a3d;
+    --neon2:#00e5ff;
+    --text:#eaeaf5;
+    --muted:#8a8aa3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  header{ text-align:center; padding:24px 16px 8px; }
+  h1{
+    margin:0; font-size:2.4rem; letter-spacing:2px; color:var(--neon);
+    text-shadow:0 0 10px rgba(255,106,61,0.6), 0 0 30px rgba(255,106,61,0.3);
+  }
+  .back{
+    display:inline-block; margin-top:10px; color:var(--muted); text-decoration:none;
+    font-size:0.85rem; border:1px solid #2a2a3d; padding:6px 14px; border-radius:20px; transition:0.2s;
+  }
+  .back:hover{ color:var(--neon); border-color:var(--neon); }
+
+  h2.page-title{
+    text-align:center; letter-spacing:3px; color:var(--neon2);
+    text-shadow:0 0 12px rgba(0,229,255,0.5); margin:20px 0 30px;
+  }
+
+  .makers{
+    display:flex;
+    flex-wrap:wrap;
+    min-height:70vh;
+  }
+  .maker{
+    flex:1 1 400px;
+    position:relative;
+    min-height:70vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* James - chessboard background */
+  .maker.james{
+    background-image:
+      linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+    background-size:60px 60px;
+    background-position:0 0, 0 30px, 30px -30px, -30px 0px;
+    background-color:#e8e4da;
+  }
+  .maker.james::before{
+    content:"";
+    position:absolute; inset:0;
+    background:rgba(5,5,10,0.55);
+  }
+
+  /* Theo - bikes background */
+  .maker.theo{
+    background-color:#12121e;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(0,229,255,0.15) 0, transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(0,229,255,0.15) 0, transparent 40%);
+  }
+  .maker.theo .bike-icon{
+    position:absolute;
+    font-size:5rem;
+    opacity:0.18;
+    transform:rotate(-8deg);
+  }
+  .maker.theo::before{
+    content:"";
+    position:absolute; inset:0;
+    background:rgba(5,5,10,0.35);
+  }
+
+  .maker-content{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding:20px;
+  }
+  .maker-title{
+    font-weight:900;
+    font-size:2.6rem;
+    letter-spacing:3px;
+    margin-bottom:14px;
+  }
+  .maker.james .maker-title{
+    color:#ffffff;
+    text-shadow:0 0 12px rgba(255,255,255,0.6), 0 2px 6px rgba(0,0,0,0.9);
+  }
+  .maker.theo .maker-title{
+    color:var(--neon2);
+    text-shadow:0 0 12px rgba(0,229,255,0.7), 0 2px 6px rgba(0,0,0,0.9);
+  }
+  .maker-bio{
+    max-width:340px;
+    margin:0 auto;
+    color:var(--text);
+    font-size:0.95rem;
+    line-height:1.5;
+    text-shadow:0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  footer{
+    text-align:center; color:var(--muted); font-size:0.75rem;
+    padding:30px 16px; letter-spacing:1px;
+  }
+
+  @media (max-width:700px){
+    .maker{ min-height:50vh; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CLICKER GAMES</h1>
+  <a class="back" href="index.html">← BACK TO CLICKER GAMES</a>
+</header>
+
+<h2 class="page-title">🤝 ABOUT THE MAKERS</h2>
+
+<div class="makers">
+
+  <div class="maker james">
+    <div class="maker-content">
+      <div class="maker-title">ABOUT JAMES</div>
+    </div>
+  </div>
+
+  <div class="maker theo">
+    <div class="bike-icon" style="top:8%; left:10%;">🚲</div>
+    <div class="bike-icon" style="top:60%; left:70%;">🚲</div>
+    <div class="bike-icon" style="top:30%; left:80%; font-size:3.5rem;">🚲</div>
+    <div class="bike-icon" style="top:75%; left:15%; font-size:3.5rem;">🚲</div>
+    <div class="maker-content">
+      <div class="maker-title">ABOUT THEO</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>© CLICKER GAMES — powered by neon and questionable life choices</footer>
+
+</body>
+</html>
