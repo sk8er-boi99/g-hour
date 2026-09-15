@@ -9,7 +9,7 @@
     --bg:#0a0a12;
     --panel:#12121e;
     --panel2:#181828;
-    --neon:#39ff88;
+    --neon:#ff6a3d;
     --neon2:#00e5ff;
     --gold:#ffd23f;
     --text:#eaeaf5;
@@ -20,7 +20,7 @@
     margin:0;
     font-family:'Segoe UI',system-ui,sans-serif;
     background:
-      radial-gradient(circle at 20% 10%, rgba(57,255,136,0.08), transparent 40%),
+      radial-gradient(circle at 20% 10%, rgba(255,106,61,0.08), transparent 40%),
       radial-gradient(circle at 80% 90%, rgba(0,229,255,0.08), transparent 40%),
       var(--bg);
     color:var(--text);
@@ -36,7 +36,7 @@
     font-size:2.4rem;
     letter-spacing:2px;
     color:var(--neon);
-    text-shadow:0 0 10px rgba(57,255,136,0.6), 0 0 30px rgba(57,255,136,0.3);
+    text-shadow:0 0 10px rgba(255,106,61,0.6), 0 0 30px rgba(255,106,61,0.3);
   }
   .back{
     display:inline-block;
@@ -72,7 +72,7 @@
     font-size:3rem;
     font-weight:800;
     color:var(--neon);
-    text-shadow:0 0 12px rgba(57,255,136,0.5);
+    text-shadow:0 0 12px rgba(255,106,61,0.5);
   }
   .rates{
     color:var(--muted);
@@ -117,9 +117,9 @@
     width:180px;
     height:180px;
     border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #1c2b20, #0c140f);
+    background:radial-gradient(circle at 35% 30%, #2b1c14, #140c0a);
     border:3px solid var(--neon);
-    box-shadow:0 0 25px rgba(57,255,136,0.5), inset 0 0 20px rgba(57,255,136,0.15);
+    box-shadow:0 0 25px rgba(255,106,61,0.5), inset 0 0 20px rgba(255,106,61,0.15);
     font-size:5rem;
     cursor:pointer;
     user-select:none;
@@ -133,7 +133,7 @@
     pointer-events:none;
     font-weight:700;
     color:var(--neon);
-    text-shadow:0 0 8px rgba(57,255,136,0.8);
+    text-shadow:0 0 8px rgba(255,106,61,0.8);
     animation:floatUp 0.9s ease-out forwards;
     z-index:50;
   }
@@ -171,8 +171,8 @@
     transition:0.15s;
   }
   .item.affordable{
-    border-color:rgba(57,255,136,0.5);
-    box-shadow:0 0 12px rgba(57,255,136,0.15);
+    border-color:rgba(255,106,61,0.5);
+    box-shadow:0 0 12px rgba(255,106,61,0.15);
   }
   .item.locked{ opacity:0.45; }
   .item-info .name{
@@ -202,7 +202,7 @@
     white-space:nowrap;
     transition:0.15s;
   }
-  .buy-btn:hover{ background:rgba(57,255,136,0.12); }
+  .buy-btn:hover{ background:rgba(255,106,61,0.12); }
   .buy-btn:disabled{
     border-color:#3a3a4d;
     color:#4a4a5d;
@@ -221,7 +221,7 @@
   .modal{
     background:var(--panel);
     border:1px solid var(--neon);
-    box-shadow:0 0 30px rgba(57,255,136,0.4);
+    box-shadow:0 0 30px rgba(255,106,61,0.4);
     border-radius:16px;
     padding:28px 30px;
     max-width:320px;
@@ -262,10 +262,10 @@
   <a class="back" href="index.html">← BACK TO CLICKER GAMES</a>
 </header>
 
-<h2 class="game-title">🚲 BIKE CLICKER</h2>
+<h2 class="game-title">🚀 ROCKET CLICKER</h2>
 
 <div class="stats">
-  <div class="label">BIKES BUILT</div>
+  <div class="label">ROCKETS LAUNCHED</div>
   <div class="count" id="count">0</div>
 </div>
 <div class="rates">PER CLICK: <span id="perClick">1</span> | PER SECOND: <span id="perSecond">0</span></div>
@@ -276,16 +276,19 @@
 </div>
 
 <div class="click-zone">
-  <button id="clickBtn">🚲</button>
+  <button id="clickBtn">🚀</button>
 </div>
 
-<div class="section-title">🇦🇺 HALL OF FAME — RECRUIT LEGENDS</div>
+<div class="section-title">🌌 MISSION CONTROL — RECRUIT CREW</div>
 <div class="shop" id="shop"></div>
+
+<div class="section-title">🔧 PARTS DEPOT — UPGRADE THE ROCKET (earns prestige)</div>
+<div class="shop" id="partsShop"></div>
 
 <div class="modal-overlay" id="prestigeModal">
   <div class="modal">
-    <h3>YOU'RE A BIKE MASTER!</h3>
-    <p>You collected 100 prestige points. The workshop bows before you.</p>
+    <h3>YOU'RE A ROCKET MASTER!</h3>
+    <p>You collected 100 prestige points. Ground control salutes you.</p>
     <div class="modal-actions"><button onclick="closePrestige()">CONTINUE</button></div>
   </div>
 </div>
@@ -311,21 +314,39 @@ let prestige = 0;
 let pendingItem = null;
 
 const items = [
-  {id:'spratt', name:'AMANDA SPRATT', desc:'+1 bike per click', cost:10, click:1, sec:0, owned:0},
-  {id:'hosking', name:'CHLOE HOSKING', desc:'+1 bike per second, automatically', cost:25, click:0, sec:1, owned:0},
-  {id:'durbridge', name:'LUKE DURBRIDGE', desc:'+2 bikes per click', cost:30, click:2, sec:0, owned:0},
-  {id:'oconnor', name:'BEN O\'CONNOR', desc:'+3 bikes per second, automatically', cost:90, click:0, sec:3, owned:0},
-  {id:'hindley', name:'JAI HINDLEY', desc:'+5 bikes per click', cost:100, click:5, sec:0, owned:0},
-  {id:'brown', name:'GRACE BROWN', desc:'+5 bikes per second, automatically', cost:150, click:0, sec:5, owned:0},
-  {id:'ewan', name:'CALEB EWAN', desc:'+8 bikes per second, automatically', cost:300, click:0, sec:8, owned:0},
-  {id:'matthews', name:'MICHAEL MATTHEWS', desc:'+10 bikes per click', cost:300, click:10, sec:0, owned:0},
-  {id:'gerrans', name:'SIMON GERRANS', desc:'+12 bikes per second, automatically', cost:500, click:0, sec:12, owned:0},
-  {id:'dennis', name:'ROHAN DENNIS', desc:'+20 bikes per click', cost:900, click:20, sec:0, owned:0},
-  {id:'porte', name:'RICHIE PORTE', desc:'+25 bikes per second, automatically', cost:1200, click:0, sec:25, owned:0},
-  {id:'mcewen', name:'ROBBIE MCEWEN', desc:'+50 bikes per second, automatically', cost:3000, click:0, sec:50, owned:0},
-  {id:'meares', name:'ANNA MEARES', desc:'+50 bikes per click', cost:4000, click:50, sec:0, owned:0},
-  {id:'ogrady', name:'STUART O\'GRADY', desc:'+100 bikes per second, automatically', cost:7000, click:0, sec:100, owned:0},
-  {id:'evans', name:'CADEL EVANS', desc:'+250 bikes per second, automatically', cost:20000, click:0, sec:250, owned:0}
+  {id:'tech1', name:'PAD TECHNICIAN', desc:'+1 rocket per click', cost:10, click:1, sec:0, owned:0},
+  {id:'fueler', name:'FUEL CREW', desc:'+1 rocket per second, automatically', cost:25, click:0, sec:1, owned:0},
+  {id:'engineer', name:'FLIGHT ENGINEER', desc:'+2 rockets per click', cost:30, click:2, sec:0, owned:0},
+  {id:'controller', name:'MISSION CONTROLLER', desc:'+3 rockets per second, automatically', cost:90, click:0, sec:3, owned:0},
+  {id:'pilot', name:'TEST PILOT', desc:'+5 rockets per click', cost:100, click:5, sec:0, owned:0},
+  {id:'scientist', name:'ROCKET SCIENTIST', desc:'+5 rockets per second, automatically', cost:150, click:0, sec:5, owned:0},
+  {id:'launchpad', name:'SECOND LAUNCHPAD', desc:'+8 rockets per second, automatically', cost:300, click:0, sec:8, owned:0},
+  {id:'commander', name:'MISSION COMMANDER', desc:'+10 rockets per click', cost:300, click:10, sec:0, owned:0},
+  {id:'factory', name:'ROCKET FACTORY', desc:'+12 rockets per second, automatically', cost:500, click:0, sec:12, owned:0},
+  {id:'astronaut', name:'VETERAN ASTRONAUT', desc:'+20 rockets per click', cost:900, click:20, sec:0, owned:0},
+  {id:'spaceport', name:'ORBITAL SPACEPORT', desc:'+25 rockets per second, automatically', cost:1200, click:0, sec:25, owned:0},
+  {id:'aifleet', name:'AUTONOMOUS FLEET', desc:'+50 rockets per second, automatically', cost:3000, click:0, sec:50, owned:0},
+  {id:'director', name:'PROGRAM DIRECTOR', desc:'+50 rockets per click', cost:4000, click:50, sec:0, owned:0},
+  {id:'megabase', name:'LUNAR MEGABASE', desc:'+100 rockets per second, automatically', cost:7000, click:0, sec:100, owned:0},
+  {id:'starfleet', name:'INTERSTELLAR FLEET', desc:'+250 rockets per second, automatically', cost:20000, click:0, sec:250, owned:0}
+];
+
+const parts = [
+  {id:'nosecone', name:'REINFORCED NOSE CONE', desc:'+1 rocket per click', cost:15, click:1, sec:0, owned:0},
+  {id:'finset', name:'STABILIZER FIN SET', desc:'+2 rockets per click', cost:40, click:2, sec:0, owned:0},
+  {id:'boosterA', name:'SOLID FUEL BOOSTER', desc:'+2 rockets per second, automatically', cost:70, click:0, sec:2, owned:0},
+  {id:'heatshield', name:'ABLATIVE HEAT SHIELD', desc:'+4 rockets per click', cost:120, click:4, sec:0, owned:0},
+  {id:'avionics', name:'AVIONICS SUITE', desc:'+6 rockets per second, automatically', cost:220, click:0, sec:6, owned:0},
+  {id:'engineV2', name:'TWIN-CHAMBER ENGINE', desc:'+10 rockets per click', cost:400, click:10, sec:0, owned:0},
+  {id:'fueltank', name:'CRYOGENIC FUEL TANK', desc:'+15 rockets per second, automatically', cost:650, click:0, sec:15, owned:0},
+  {id:'guidance', name:'PRECISION GUIDANCE CHIP', desc:'+20 rockets per click', cost:1000, click:20, sec:0, owned:0},
+  {id:'boosterB', name:'CLUSTER BOOSTER ARRAY', desc:'+30 rockets per second, automatically', cost:1800, click:0, sec:30, owned:0},
+  {id:'hull', name:'CARBON-FIBER HULL', desc:'+40 rockets per click', cost:3200, click:40, sec:0, owned:0},
+  {id:'reusable', name:'REUSABLE LANDING LEGS', desc:'+60 rockets per second, automatically', cost:5000, click:0, sec:60, owned:0},
+  {id:'engineV3', name:'ION PROPULSION CORE', desc:'+100 rockets per click', cost:9000, click:100, sec:0, owned:0},
+  {id:'shielding', name:'DEEP-SPACE SHIELDING', desc:'+150 rockets per second, automatically', cost:15000, click:0, sec:150, owned:0},
+  {id:'antimatter', name:'ANTIMATTER DRIVE', desc:'+300 rockets per click', cost:30000, click:300, sec:0, owned:0},
+  {id:'warpcore', name:'EXPERIMENTAL WARP CORE', desc:'+500 rockets per second, automatically', cost:60000, click:0, sec:500, owned:0}
 ];
 
 function fmt(n){
@@ -339,9 +360,14 @@ function render(){
   document.getElementById('prestigeText').textContent = `${Math.min(prestige,100)} / 100`;
   document.getElementById('prestigeFill').style.width = Math.min(prestige,100) + '%';
 
-  const shop = document.getElementById('shop');
+  renderShop('shop', items);
+  renderShop('partsShop', parts);
+}
+
+function renderShop(elementId, list){
+  const shop = document.getElementById(elementId);
   shop.innerHTML = '';
-  items.forEach(item => {
+  list.forEach(item => {
     const affordable = count >= item.cost;
     const div = document.createElement('div');
     div.className = 'item ' + (affordable ? 'affordable' : 'locked');
@@ -360,11 +386,16 @@ function render(){
   });
 }
 
+function findItem(id){
+  return items.find(i=>i.id===id) || parts.find(i=>i.id===id);
+}
+
 function openBuyModal(id){
-  const item = items.find(i=>i.id===id);
+  const item = findItem(id);
   if(!item || count < item.cost) return;
   pendingItem = item;
-  document.getElementById('buyModalDesc').textContent = `${item.name} — ${item.desc} for ${fmt(item.cost)} bikes.`;
+  const isPart = parts.includes(item);
+  document.getElementById('buyModalDesc').textContent = `${item.name} — ${item.desc} for ${fmt(item.cost)} rockets.` + (isPart ? ' Earns 1 prestige point.' : '');
   document.getElementById('buyModal').classList.add('show');
 }
 function closeBuyModal(){
@@ -380,7 +411,7 @@ function confirmBuy(){
     perClick += item.click;
     perSecond += item.sec;
     item.cost = Math.floor(item.cost * 1.65);
-    if(item.click > 0){
+    if(parts.includes(item)){
       prestige = Math.min(100, prestige + 1);
       checkPrestige();
     }
@@ -423,6 +454,7 @@ setInterval(()=>{
 
 render();
 </script>
+
 
 <audio id="bgMusic" loop preload="auto"></audio>
 <button id="musicToggleBtn" title="Toggle music" style="position:fixed; bottom:16px; right:16px; z-index:999; width:48px; height:48px; border-radius:50%; border:1px solid #ffd23f; background:rgba(10,10,18,0.85); color:#ffd23f; font-size:1.3rem; cursor:pointer; box-shadow:0 0 12px rgba(255,210,63,0.4);">🔈</button>

@@ -689,5 +689,56 @@ initPlanes();
 updateHUD();
 animId = requestAnimationFrame(loop);
 </script>
+
+<audio id="bgMusic" loop preload="auto"></audio>
+<button id="musicToggleBtn" title="Toggle music" style="position:fixed; bottom:16px; right:16px; z-index:999; width:48px; height:48px; border-radius:50%; border:1px solid #ffd23f; background:rgba(10,10,18,0.85); color:#ffd23f; font-size:1.3rem; cursor:pointer; box-shadow:0 0 12px rgba(255,210,63,0.4);">🔈</button>
+<script>
+(function(){
+  var playlist = [
+    "paulyudin-upbeat-upbeat-rock-491415.mp3",
+    "verclub_music-upbeat-550944.mp3",
+    "prettyjohn1-upbeat-upbeat-background-music-494561.mp3",
+    "eduardbykovets-tulum-243370.mp3"
+  ];
+  var audio = document.getElementById('bgMusic');
+  var btn = document.getElementById('musicToggleBtn');
+  audio.volume = 0.35;
+  audio.loop = false;
+
+  var trackIndex = parseInt(localStorage.getItem('bgMusicTrackIndex') || '0', 10);
+  if (isNaN(trackIndex) || trackIndex < 0 || trackIndex >= playlist.length) trackIndex = 0;
+
+  function loadTrack(i){
+    audio.src = playlist[i];
+    localStorage.setItem('bgMusicTrackIndex', String(i));
+  }
+  function nextTrack(){
+    trackIndex = (trackIndex + 1) % playlist.length;
+    loadTrack(trackIndex);
+    tryPlay();
+  }
+  audio.addEventListener('ended', nextTrack);
+
+  var playing = false;
+  function tryPlay(){
+    audio.play().then(function(){ playing = true; btn.textContent = '🔊'; }).catch(function(){ playing = false; btn.textContent = '🔈'; });
+  }
+
+  loadTrack(trackIndex);
+  tryPlay();
+
+  document.addEventListener('click', function firstInteract(){
+    if(!playing){ tryPlay(); }
+    document.removeEventListener('click', firstInteract);
+  }, {once:true});
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(playing){ audio.pause(); playing=false; btn.textContent='🔈'; }
+    else { tryPlay(); }
+  });
+})();
+</script>
+
 </body>
 </html>
