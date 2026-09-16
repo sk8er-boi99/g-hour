@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLICKER GAMES — Login</title>
+<style>
+  :root{
+    --bg:#0a0a12;
+    --panel:#12121e;
+    --panel2:#181828;
+    --neon:#ff6a3d;
+    --neon2:#00e5ff;
+    --gold:#ffd23f;
+    --text:#eaeaf5;
+    --muted:#8a8aa3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,106,61,0.08), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(0,229,255,0.08), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  h1{
+    margin:0 0 4px;
+    font-size:2.2rem;
+    letter-spacing:2px;
+    color:var(--neon);
+    text-shadow:0 0 10px rgba(255,106,61,0.6), 0 0 30px rgba(255,106,61,0.3);
+    text-align:center;
+  }
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.85rem;
+    letter-spacing:1px;
+    margin-bottom:26px;
+  }
+  .card{
+    background:linear-gradient(180deg, var(--panel2), var(--panel));
+    border:1px solid #2a2a3d;
+    border-radius:16px;
+    padding:32px 28px;
+    width:100%;
+    max-width:360px;
+    box-shadow:0 0 30px rgba(0,0,0,0.4);
+  }
+  label{
+    display:block;
+    font-size:0.75rem;
+    letter-spacing:1.5px;
+    color:var(--neon2);
+    margin-bottom:8px;
+  }
+  input[type="password"]{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #2a2a3d;
+    background:#0d0d16;
+    color:var(--text);
+    font-size:1rem;
+    outline:none;
+    transition:0.15s;
+  }
+  input[type="password"]:focus{
+    border-color:var(--neon2);
+    box-shadow:0 0 10px rgba(0,229,255,0.3);
+  }
+  .btn{
+    width:100%;
+    margin-top:18px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--neon);
+    background:transparent;
+    color:var(--neon);
+    font-weight:700;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:0.15s;
+  }
+  .btn:hover{ background:rgba(255,106,61,0.12); }
+  .error{
+    color:#ff5f5f;
+    font-size:0.85rem;
+    margin-top:12px;
+    text-align:center;
+    min-height:1.2em;
+  }
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.7rem;
+    margin-top:24px;
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+
+<div>
+  <h1>CLICKER GAMES</h1>
+  <div class="subtitle">ENTER PASSWORD TO CONTINUE</div>
+
+  <div class="card">
+    <form id="loginForm">
+      <label for="password">PASSWORD</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" autofocus />
+      <button type="submit" class="btn">ENTER</button>
+      <div class="error" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <footer>© CLICKER GAMES</footer>
+</div>
+
+<script>
+  var VALID_PASSWORDS = [
+    "MAXDONATAI999",
+    "THEOMCKENNA888",
+    "JAMESKILDEA777"
+  ];
+
+  // If already logged in, skip straight to the games
+  if (localStorage.getItem('ghour_authed') === 'true') {
+    window.location.href = 'index.html';
+  }
+
+  var form = document.getElementById('loginForm');
+  var errorMsg = document.getElementById('errorMsg');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var entered = document.getElementById('password').value;
+    if (VALID_PASSWORDS.indexOf(entered) !== -1) {
+      localStorage.setItem('ghour_authed', 'true');
+      window.location.href = 'index.html';
+    } else {
+      errorMsg.textContent = 'Incorrect password. Try again.';
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+    }
+  });
+</script>
+
+</body>
+</html>
